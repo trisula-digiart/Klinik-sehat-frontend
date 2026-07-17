@@ -34,7 +34,6 @@ function navigateTo(viewName) {
 function renderLayout() {
   const loginSection = document.getElementById('login-section');
   const mainLayout = document.getElementById('main-layout');
-  const sidebarNav = document.getElementById('sidebar-navigation');
   const contentContainer = document.getElementById('main-content-stream');
 
   // Sembunyikan semua layout utama dulu
@@ -94,7 +93,6 @@ function renderLayout() {
 function renderSidebarMenu(role) {
   const sidebarNav = document.getElementById('sidebar-navigation');
   
-  // Semua menu navigasi standar
   const menuItems = [
     { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: '👤', roles: ['Admin'] },
     { id: 'antrian', label: 'Monitor Antrean', icon: '📋', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
@@ -177,10 +175,13 @@ async function executeLogin(e) {
   btnSubmit.innerText = "Memverifikasi...";
 
   try {
-    const response = await fetch(CONFIG.BASE_URL, {
+    // MODIFIKASI: Menyuntikkan token langsung ke URL Parameter sebagai fallback penanganan CORS Web App
+    const targetUrl = `${CONFIG.BASE_URL}?api_key=${encodeURIComponent(CONFIG.API_KEY)}`;
+
+    const response = await fetch(targetUrl, {
       method: 'POST',
       mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' }, // Mencegah preflight CORS issue pada GAS
+      headers: { 'Content-Type': 'text/plain' }, 
       body: JSON.stringify({
         api_key: CONFIG.API_KEY,
         action: 'login',
