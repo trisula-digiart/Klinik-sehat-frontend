@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi Manajemen Klinik Sehat</title>
+  <!-- Tailwind CSS Via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased">
+
+  <!-- ================= LAYOUT 1: SCREEN LOGIN ================= -->
+  <section id="login-section" class="min-h-screen flex items-center justify-center bg-slate-900 p-4 hidden">
+    <!-- Konten di-render dinamis via app.js -->
+  </section>
+
+  <!-- ================= LAYOUT 2: LAYOUT UTAMA APLIKASI (SPA SIDEBAR) ================= -->
+  <section id="main-layout" class="min-h-screen flex hidden">
+    
+    <!-- Sidebar Kiri Fired Secara Dinamis Berdasarkan Hak Peran Staf -->
+    <aside id="sidebar-navigation" class="w-64 bg-slate-900 p-5 flex flex-col border-r border-slate-800 shrink-0 text-white">
+      <!-- Konten di-render dinamis via app.js -->
+    </aside>
+
+    <!-- Konten Canvas Area Utama Sebelah Kanan (Scrollable Stream Content) -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      
+      <!-- Topbar Header -->
+      <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status Server: Terkoneksi (GAS API)</span>
+        </div>
+        <div class="text-xs text-slate-500 font-medium">
+          Sistem Informasi Klinik Sehat v3.0 • Tahun Operasional 2026
+        </div>
+      </header>
+
+      <!-- Tempat Konten View Mengalir Dinamis Tanpa Reload Halaman -->
+      <div id="main-content-stream" class="p-8 flex-1 max-w-[1600px] w-full mx-auto">
+        <!-- Tampilan halaman spesifik modul disuntikkan di sini -->
+      </div>
+    </main>
+
+  </section>
+
+  <!-- Memuat Engine Skrip Dasar Aplikasi (Pastikan Urutan Jangan Terbalik!) -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+  
+  <!-- Script modul fungsional halaman (Akan diisi pada modul-modul berikutnya) -->
+  <script src="assets/js/pasien.js"></script>
+  <script src="assets/js/antrian.js"></script>
+  <script src="assets/js/dokter.js"></script>
+  <script src="assets/js/apotek.js"></script>
+  <script src="assets/js/kasir.js"></script>
+</body>
+</html>
