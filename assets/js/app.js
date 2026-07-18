@@ -1,6 +1,7 @@
 /**
  * app.js
  * Core SPA Router Engine - Path Customization for assets/js/ Folder Structure
+ * Integrated Dashboard Realtime Statistics & Charting Engine
  */
 
 // Pengaman deklarasi ganda variable state SPA
@@ -64,8 +65,8 @@ function renderLayout() {
           </div>
         </div>
 
-        <!-- WIDGET STATISTIK DASHBOARD KLINIK -->
-        <div class="row g-4 mt-2 animate-fadeIn">
+        <!-- WIDGET STATISTIK DASHBOARD KLINIK REALTIME SINKRON -->
+        <div class="row g-4 mt-2 animate-fadeIn text-dark">
           <div class="col-12 col-sm-6 col-xl-3">
             <div class="panel p-3 bg-white border rounded-3 h-100 d-flex align-items-center">
               <div class="p-3 rounded-circle bg-primary-subtle text-primary me-3">
@@ -73,7 +74,7 @@ function renderLayout() {
               </div>
               <div>
                 <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Total Pasien</small>
-                <h3 class="fw-bold mb-0 mt-1">1,248</h3>
+                <h3 class="fw-bold mb-0 mt-1" id="dash-card-total-pasien">---</h3>
               </div>
             </div>
           </div>
@@ -84,7 +85,7 @@ function renderLayout() {
               </div>
               <div>
                 <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Antrean Aktif</small>
-                <h3 class="fw-bold mb-0 mt-1">18 Pasien</h3>
+                <h3 class="fw-bold mb-0 mt-1" id="dash-card-antrean-aktif">---</h3>
               </div>
             </div>
           </div>
@@ -95,7 +96,7 @@ function renderLayout() {
               </div>
               <div>
                 <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Selesai Periksa</small>
-                <h3 class="fw-bold mb-0 mt-1">32 Kasus</h3>
+                <h3 class="fw-bold mb-0 mt-1" id="dash-card-selesai-periksa">---</h3>
               </div>
             </div>
           </div>
@@ -106,20 +107,103 @@ function renderLayout() {
               </div>
               <div>
                 <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Omset Tunai Hari Ini</small>
-                <h3 class="fw-bold mb-0 mt-1">Rp 4.250k</h3>
+                <h3 class="fw-bold mb-0 mt-1" id="dash-card-omset-tunai">---</h3>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="panel mt-4">
-          <div class="panel-header mb-2"><h2 class="h5 mb-0 section-title"><span>Status Operasional Sistem</span></h2></div>
+        <!-- PANEL MIDDLE: GRAFIK KUNJUNGAN 7 HARI & STATUS ANTREAN POLI HARI INI -->
+        <div class="row g-4 mt-2 text-dark">
+          <!-- Kiri: Grafik Kunjungan 7 Hari -->
+          <div class="col-12 col-lg-7">
+            <div class="panel p-4 bg-white border rounded-3 h-100">
+              <div class="panel-header border-b pb-3 mb-3">
+                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                  <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Tren Kunjungan Pasien (7 Hari Terakhir)
+                </h3>
+              </div>
+              <div style="position: relative; height: 230px; width: 100%;">
+                <canvas id="dash-chart-kunjungan"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kanan: Status Antrean Poliklinik Hari Ini -->
+          <div class="col-12 col-lg-5">
+            <div class="panel p-4 bg-white border rounded-3 h-100">
+              <div class="panel-header border-b pb-3 mb-3">
+                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                  <i class="bi bi-clipboard2-pulse me-2 text-info"></i>Status Antrian Poliklinik Hari Ini
+                </h3>
+              </div>
+              <div class="list-group list-group-flush small">
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2.5">
+                  <div>
+                    <strong class="d-block">Poli Umum</strong>
+                    <span class="text-muted style-code">Prefix Kode Antrean A</span>
+                  </div>
+                  <span class="badge bg-primary rounded-pill px-3 py-2" id="dash-poli-umum">0 Pasien</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2.5">
+                  <div>
+                    <strong class="d-block">Poli Gigi</strong>
+                    <span class="text-muted style-code">Prefix Kode Antrean B</span>
+                  </div>
+                  <span class="badge bg-warning text-dark rounded-pill px-3 py-2" id="dash-poli-gigi">0 Pasien</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2.5">
+                  <div>
+                    <strong class="d-block">Poli Anak / KIA</strong>
+                    <span class="text-muted style-code">Prefix Kode Antrean C</span>
+                  </div>
+                  <span class="badge bg-success rounded-pill px-3 py-2" id="dash-poli-anak">0 Pasien</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL BAWAH: JADWAL DOKTER HARI INI & STATUS OPERASIONAL -->
+        <div class="row g-4 mt-2 text-dark">
+          <div class="col-12">
+            <div class="panel p-4 bg-white border rounded-3">
+              <div class="panel-header border-b pb-3 mb-3">
+                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                  <i class="bi bi-calendar3 me-2 text-success"></i>Jadwal Dokter Bertugas Hari Ini
+                </h3>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small text-nowrap">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Nama Dokter</th>
+                      <th>Spesialisasi</th>
+                      <th>Jam Operasional Shift</th>
+                      <th class="text-center">Status Kehadiran</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-tbody-jadwal-dokter">
+                    <tr>
+                      <td colspan="4" class="text-center text-muted py-3">Memuat informasi jadwal dokter...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel mt-4 bg-light text-dark">
+          <div class="panel-header mb-2"><h2 class="h5 mb-0 section-title" style="font-size:0.9rem;"><span>Status Operasional Sistem</span></h2></div>
           <p class="text-muted mb-0 small">Seluruh modul inti SIMRS v3.0 terhubung sukses dengan Google Apps Script Cloud Engine. Gunakan bar menu navigasi di sebelah kiri untuk memproses data operasional poliklinik secara realtime.</p>
         </div>`;
+      
+      // Trigger asinkronus fetch data sinkronisasi dashboard riil & pembuatan grafik
+      loadDashboardData();
       break;
 
     case 'pendaftaran':
-      // MENGARAH KE WINDOW.PASIENMODULE YANG DI-INJECT OLEH PENDAFTARAN.JS
       wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PasienModule);
       break;
 
@@ -161,6 +245,92 @@ function renderLayout() {
 
     default:
       contentContainer.innerHTML = `<div class="alert alert-danger">Error: View '${AppState.currentView}' tidak valid.</div>`;
+  }
+}
+
+/**
+ * FUNGSI AJAX CORE ENGINE: Sinkronisasi Data Riil & Grafik Dashboard
+ */
+async function loadDashboardData() {
+  try {
+    const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getDashboardData`;
+    const response = await fetch(url, { method: 'GET', mode: 'cors' });
+    const res = await response.json();
+
+    if (res.success && res.data) {
+      const d = res.data;
+
+      // 1. Inject Data Riil Info Cards
+      document.getElementById('dash-card-total-pasien').innerText = Number(d.cards.total_pasien).toLocaleString('id-ID');
+      document.getElementById('dash-card-antrean-aktif').innerText = `${d.cards.antrean_aktif} Pasien`;
+      document.getElementById('dash-card-selesai-periksa').innerText = `${d.cards.selesai_periksa} Kasus`;
+      document.getElementById('dash-card-omset-tunai').innerText = "Rp " + (d.cards.omset_tunai / 1000).toLocaleString('id-ID', {maximumFractionDigits:1}) + "k";
+
+      // 2. Inject Ringkasan Antrean Poliklinik
+      document.getElementById('dash-poli-umum').innerText = `${d.poliklinik.umum} Pasien`;
+      document.getElementById('dash-poli-gigi').innerText = `${d.poliklinik.gigi} Pasien`;
+      document.getElementById('dash-poli-anak').innerText = `${d.poliklinik.anak} Pasien`;
+
+      // 3. Inject Tabel Jadwal Dokter Hari Ini
+      const tbodyDokter = document.getElementById('dash-tbody-jadwal-dokter');
+      if (tbodyDokter && d.jadwal_dokter.length > 0) {
+        tbodyDokter.innerHTML = d.jadwal_dokter.map(dok => `
+          <tr>
+            <td class="fw-bold text-dark"><i class="bi bi-person-badge me-2 text-primary"></i>${dok.nama}</td>
+            <td><span class="badge bg-light text-dark border px-2 py-1">${dok.spesialisasi}</span></td>
+            <td class="font-monospace">${dok.jam_kerja}</td>
+            <td class="text-center"><span class="badge text-bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>${dok.status || 'Bertugas'}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // 4. Inisialisasi Visual Grafik Realtime Menggunakan Chart.js
+      const ctx = document.getElementById('dash-chart-kunjungan');
+      if (ctx && window.Chart) {
+        // Hancurkan objek chart lama jika ada re-render SPA untuk mencegah memori bocor
+        if (window.myDashboardChartInstance) {
+          window.myDashboardChartInstance.destroy();
+        }
+
+        window.myDashboardChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: d.chart.labels,
+            datasets: [{
+              label: 'Jumlah Kunjungan Pasien',
+              data: d.chart.datasets,
+              borderColor: '#0d6efd',
+              backgroundColor: 'rgba(13, 110, 253, 0.05)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#0d6efd',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, color: '#6c757d' },
+                grid: { borderDash: [5, 5] }
+              },
+              x: {
+                ticks: { color: '#6c757d' },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Gagal sinkronisasi data dashboard realtime:", error);
   }
 }
 
@@ -375,7 +545,6 @@ window.addEventListener('DOMContentLoaded', () => {
   if (savedSession) {
     try {
       AppState.user = JSON.parse(savedSession);
-      // Biarkan memproses routing ke halaman yang sedang dibuka
       renderLayout();
     } catch (e) {
       localStorage.removeItem('simrs_user_session');
