@@ -174,9 +174,10 @@ window.PendaftaranModule = window.PendaftaranModule || {
     }
   },
 
-  /**
-   * Mengirim data form pendaftaran ke backend `Main.gs`
-   */
+  // =========================================================================
+// PATCH MODE: Update Fungsi handleDaftarPasien di pendaftaran.js
+// =========================================================================
+
   handleDaftarPasien: async function(event) {
     event.preventDefault();
     const btn = document.getElementById('btn-submit-pasien');
@@ -208,9 +209,19 @@ window.PendaftaranModule = window.PendaftaranModule || {
         this.showAlert(`Sukses mendaftarkan pasien! RM Baru: ${res.data.no_rm}`);
         document.getElementById('form-pasien-baru').reset();
 
-        // FAST-TRACK UX: Langsung lempar nomor RM ke form kanan dan tampilkan form eksekusi poliklinik
+        // >>> DISINI KUNCINYA BRO: Langsung lempar ke pencarian/eksekusi poli di kanan <<<
         document.getElementById('pendaftaran-search-key').value = res.data.no_rm;
-        this.pilihPasienEksekusi(res.data);
+        
+        // Buat objek data pasien lengkap sesuai bentukan database untuk dilempar ke form eksekusi poli
+        const pasienBaru = {
+          no_rm: res.data.no_rm,
+          nik: payload.nik,
+          nama: payload.nama,
+          jenis_penjamin: payload.jenis_penjamin
+        };
+        
+        // Panggil fungsi untuk langsung merender form pilihan poli di panel kanan
+        this.pilihPasienEksekusi(pasienBaru);
       } else {
         this.showAlert(res.message || "Gagal menyimpan pasien.", false);
       }
@@ -219,7 +230,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
     } finally {
       btn.disabled = false;
       btn.innerHTML = `<i class="bi bi-person-check me-2"></i>Daftarkan Pasien Baru`;
-      this.loadPendingQueue(); // Segarkan data tabel monitor
+      this.loadPendingQueue(); // Segarkan isi tabel list antrean kerja di bawahnya
     }
   },
 
