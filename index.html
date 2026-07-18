@@ -3,59 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Informasi Manajemen Klinik Sehat</title>
-  <!-- Tailwind CSS Via CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <!-- Google Fonts Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Sistem Informasi Manajemen Klinik Sehat">
+  <title>Klinik Sehat | Dashboard Utama</title>
+
+  <!-- Aset CSS Asli Bawaan Template adminHMD -->
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    /* Utility pendukung SPA */
+    .hidden { display: none !important; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 antialiased">
 
-  <!-- ================= LAYOUT 1: SCREEN LOGIN ================= -->
-  <section id="login-section" class="min-h-screen flex items-center justify-center bg-slate-900 p-4 hidden">
-    <!-- Konten di-render dinamis via app.js -->
-  </section>
+<body>
+  <!-- ================= LAYOUT 1: SCREEN LOGIN (Menggunakan struktur auth-card template) ================= -->
+  <main id="login-section" class="auth-body hidden">
+    <!-- Konten di-render dinamis via app.js untuk efisiensi SPA -->
+  </main>
 
-  <!-- ================= LAYOUT 2: LAYOUT UTAMA APLIKASI (SPA SIDEBAR) ================= -->
-  <section id="main-layout" class="min-h-screen flex hidden">
-    
-    <!-- Sidebar Kiri Fired Secara Dinamis Berdasarkan Hak Peran Staf -->
-    <aside id="sidebar-navigation" class="w-64 bg-slate-900 p-5 flex flex-col border-r border-slate-800 shrink-0 text-white">
+  <!-- ================= LAYOUT 2: LAYOUT UTAMA APLIKASI (SPA SHELL) ================= -->
+  <div id="main-layout" class="admin-shell hidden">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <!-- Sidebar Navigasi Kiri (Dinamis Berdasarkan Role) -->
+    <aside class="admin-sidebar" id="sidebar-navigation" aria-label="Main navigation">
       <!-- Konten di-render dinamis via app.js -->
     </aside>
 
-    <!-- Konten Canvas Area Utama Sebelah Kanan (Scrollable Stream Content) -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-      
-      <!-- Topbar Header -->
-      <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm shrink-0">
-        <div class="flex items-center space-x-2">
-          <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status Server: Terkoneksi (GAS API)</span>
+    <!-- Konten Kanan (Topbar + Main Content Stream) -->
+    <div class="admin-main">
+      <!-- Navbar / Topbar Header -->
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="sidebar-navigation" aria-expanded="true" aria-label="Toggle sidebar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <!-- Status Koneksi Server GAS API -->
+          <div class="d-none d-md-flex ms-3 flex-grow-1 align-items-center">
+            <span class="status-dot bg-success me-2" style="width: 10px; height: 10px; display: inline-block; border-radius: 50%;"></span>
+            <small class="text-muted fw-medium">Status Server: Terkoneksi (GAS API v3.0 • 2026)</small>
+          </div>
+
+          <div class="navbar-actions ms-auto">
+            <!-- Theme Toggle (Dark/Light) bawaan template -->
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
+              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+            </button>
+
+            <!-- Dropdown Profil Staf Aktif -->
+            <div class="dropdown">
+              <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img class="avatar-img avatar-sm" id="topbar-avatar" src="assets/images/avatar/avatar.jpg" alt="User Avatar">
+                <span class="profile-name d-none d-sm-inline" id="topbar-username">Staf Klinik</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" onclick="navigateTo('pengaturan')">Pengaturan Sistem</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="executeLogout()">Keluar Aplikasi</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div class="text-xs text-slate-500 font-medium">
-          Sistem Informasi Klinik Sehat v3.0 • Tahun Operasional 2026
-        </div>
-      </header>
+      </nav>
 
       <!-- Tempat Konten View Mengalir Dinamis Tanpa Reload Halaman -->
-      <div id="main-content-stream" class="p-8 flex-1 max-w-[1600px] w-full mx-auto">
-        <!-- Tampilan halaman spesifik modul disuntikkan di sini -->
-      </div>
-    </main>
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4" id="main-content-stream">
+          <!-- Tampilan halaman spesifik modul disuntikkan di sini -->
+        </div>
+      </main>
 
-  </section>
+      <!-- Footer Bawaan Template -->
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>Copyright &copy; 2026 <strong>Klinik Sehat v3.0</strong>. All Rights Reserved.</span>
+          <span>Sistem Informasi Manajemen Klinik</span>
+        </div>
+      </footer>
+    </div>
+  </div>
 
-  <!-- Memuat Engine Skrip Dasar Aplikasi (Pastikan Urutan Jangan Terbalik!) -->
+  <!-- Memuat Engine Skrip Utama -->
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/main.js"></script> <!-- Script theme toggle template -->
   
-  <!-- Script modul fungsional halaman (Akan diisi pada modul-modul berikutnya) -->
+  <!-- Script Modul Fungsional Klinis -->
   <script src="assets/js/pasien.js"></script>
   <script src="assets/js/antrian.js"></script>
   <script src="assets/js/dokter.js"></script>
