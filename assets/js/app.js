@@ -265,6 +265,10 @@ async function executeLogin(e) {
         ...resData.data,
         avatar: resData.data.role === 'Dokter' ? 'avatar-2.jpg' : 'avatar.jpg'
       };
+      
+      // Mengamankan data sesi login ke localStorage browser
+      localStorage.setItem('simrs_user_session', JSON.stringify(AppState.user));
+      
       navigateTo('dashboard');
     } else {
       errorBox.innerText = resData.message || "Kredensial salah.";
@@ -282,9 +286,24 @@ async function executeLogin(e) {
 
 function executeLogout() {
   AppState.user = null;
+  // Menghapus rekaman sesi login di localStorage saat staf logout
+  localStorage.removeItem('simrs_user_session');
   navigateTo('login');
 }
 
+// Handler pengecekan status login aktif saat halaman di-reload / F5
 window.addEventListener('DOMContentLoaded', () => {
-  navigateTo('login');
+  const savedSession = localStorage.getItem('simrs_user_session');
+  
+  if (savedSession) {
+    try {
+      AppState.user = JSON.parse(savedSession);
+      navigateTo('dashboard');
+    } catch (e) {
+      localStorage.removeItem('simrs_user_session');
+      navigateTo('login');
+    }
+  } else {
+    navigateTo('login');
+  }
 });
