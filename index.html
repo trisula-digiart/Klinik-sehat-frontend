@@ -1,42 +1,43 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sistem Informasi Manajemen Klinik Sehat">
-  <title>Klinik Sehat | Dashboard Utama</title>
+  <title>Klinik Sehat | Dashboard</title>
 
-  <!-- Aset CSS Asli Bawaan Template adminHMD -->
+  <!-- Aset CSS Murni Template adminHMD -->
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="assets/css/style.css">
   
   <style>
-    /* Utility pendukung SPA */
     .hidden { display: none !important; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    /* Memastikan navigasi sidebar memiliki scroll internal yang rapi */
+    .sidebar-nav { flex: 1; overflow-y: auto; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
   </style>
 </head>
 
 <body>
-  <!-- ================= LAYOUT 1: SCREEN LOGIN (Menggunakan struktur auth-card template) ================= -->
+  <!-- ================= LAYOUT 1: SCREEN LOGIN ================= -->
   <main id="login-section" class="auth-body hidden">
-    <!-- Konten di-render dinamis via app.js untuk efisiensi SPA -->
+    <!-- Render otomatis via app.js -->
   </main>
 
-  <!-- ================= LAYOUT 2: LAYOUT UTAMA APLIKASI (SPA SHELL) ================= -->
+  <!-- ================= LAYOUT 2: LAYOUT UTAMA SPA ================= -->
   <div id="main-layout" class="admin-shell hidden">
     <div class="sidebar-backdrop" data-sidebar-close></div>
 
-    <!-- Sidebar Navigasi Kiri (Dinamis Berdasarkan Role) -->
+    <!-- Sidebar adminHMD -->
     <aside class="admin-sidebar" id="sidebar-navigation" aria-label="Main navigation">
-      <!-- Konten di-render dinamis via app.js -->
+      <!-- Render otomatis via app.js -->
     </aside>
 
-    <!-- Konten Kanan (Topbar + Main Content Stream) -->
+    <!-- Kanan: Main Content -->
     <div class="admin-main">
-      <!-- Navbar / Topbar Header -->
+      <!-- Navbar Header -->
       <nav class="navbar admin-navbar navbar-expand bg-white">
         <div class="container-fluid px-3 px-lg-4">
           <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="sidebar-navigation" aria-expanded="true" aria-label="Toggle sidebar">
@@ -45,58 +46,52 @@
             <span></span>
           </button>
 
-          <!-- Status Koneksi Server GAS API -->
           <div class="d-none d-md-flex ms-3 flex-grow-1 align-items-center">
-            <span class="status-dot bg-success me-2" style="width: 10px; height: 10px; display: inline-block; border-radius: 50%;"></span>
-            <small class="text-muted fw-medium">Status Server: Terkoneksi (GAS API v3.0 • 2026)</small>
+            <span class="status-dot" style="background-color: #22c55e; width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+            <span class="sidebar-footer-text text-muted ms-2">GAS API Connected v3.0 • Tahun Operasional 2026</span>
           </div>
 
           <div class="navbar-actions ms-auto">
-            <!-- Theme Toggle (Dark/Light) bawaan template -->
             <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
               <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
             </button>
-
-            <!-- Dropdown Profil Staf Aktif -->
+            
             <div class="dropdown">
               <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="avatar-img avatar-sm" id="topbar-avatar" src="assets/images/avatar/avatar.jpg" alt="User Avatar">
+                <img class="avatar-img avatar-sm" id="topbar-avatar" src="assets/images/avatar/avatar.jpg" alt="Staf">
                 <span class="profile-name d-none d-sm-inline" id="topbar-username">Staf Klinik</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#" onclick="navigateTo('pengaturan')">Pengaturan Sistem</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="executeLogout()">Keluar Aplikasi</a></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="executeLogout()">Sign Out</a></li>
               </ul>
             </div>
           </div>
         </div>
       </nav>
 
-      <!-- Tempat Konten View Mengalir Dinamis Tanpa Reload Halaman -->
+      <!-- Tempat Konten SPA Mengalir Sesuai Standar adminHMD -->
       <main class="dashboard-content">
         <div class="container-fluid px-3 px-lg-4 py-4" id="main-content-stream">
-          <!-- Tampilan halaman spesifik modul disuntikkan di sini -->
+          <!-- Tampilan Halaman Suntikan SPA -->
         </div>
       </main>
 
-      <!-- Footer Bawaan Template -->
       <footer class="admin-footer">
         <div class="container-fluid px-3 px-lg-4">
-          <span>Copyright &copy; 2026 <strong>Klinik Sehat v3.0</strong>. All Rights Reserved.</span>
-          <span>Sistem Informasi Manajemen Klinik</span>
+          <span>Copyright &copy; 2026 <strong>Klinik Sehat</strong>.</span>
+          <span>Professional Clinic Dashboard.</span>
         </div>
       </footer>
     </div>
   </div>
 
-  <!-- Memuat Engine Skrip Utama -->
+  <!-- JavaScript Engine -->
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
-  <script src="assets/js/main.js"></script> <!-- Script theme toggle template -->
-  
-  <!-- Script Modul Fungsional Klinis -->
+  <script src="assets/js/main.js"></script>
+
+  <!-- Script Modul Fungsional -->
   <script src="assets/js/pasien.js"></script>
   <script src="assets/js/antrian.js"></script>
   <script src="assets/js/dokter.js"></script>
