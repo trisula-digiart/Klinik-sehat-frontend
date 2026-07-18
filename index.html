@@ -6,12 +6,10 @@
   <meta name="description" content="Sistem Informasi Manajemen Klinik Sehat">
   <title>Klinik Sehat | Dashboard</title>
 
-  <!-- Koreksi Jalur Aset: Memastikan file CSS ter-load sempurna dari root project -->
+  <!-- JALUR PATH KOREKSI: Tanpa ../ karena index.html sudah sejajar dengan folder assets -->
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  
-  <!-- Fallback CDN Bootstrap Icons untuk menjamin ikon menu langsung muncul -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <style>
     .hidden { display: none !important; }
@@ -36,7 +34,7 @@
       <!-- Render otomatis via app.js -->
     </aside>
 
-    <!-- Kanan: Main Content -->
+    <!-- Kanan: Main Content Canvas -->
     <div class="admin-main">
       <!-- Navbar Header -->
       <nav class="navbar admin-navbar navbar-expand bg-white">
@@ -86,13 +84,13 @@
     </div>
   </div>
 
-  <!-- JavaScript Engine -->
+  <!-- JavaScript Engine Framework -->
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/main.js"></script>
 
-  <!-- Script Modul Fungsional -->
+  <!-- Script Modul Fungsional Klinis -->
   <script src="assets/js/pasien.js"></script>
   <script src="assets/js/antrian.js"></script>
   <script src="assets/js/dokter.js"></script>
