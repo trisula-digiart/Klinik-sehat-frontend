@@ -16,7 +16,7 @@ const KasirModule = {
     return `
       <div class="container-fluid px-0 pair-fade-in">
         <!-- Alert Box untuk notifikasi sistem -->
-        <div id="kasir-alert" class="alert d-none role="alert"></div>
+        <div id="kasir-alert" class="alert d-none" role="alert"></div>
 
         <!-- Panel Lookup Input -->
         <div class="card shadow-sm mb-4 border-0">
@@ -29,7 +29,7 @@ const KasirModule = {
                 <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="form-control form-control-lg">
               </div>
               <div class="col-12 col-md-3">
-                <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg w-100 h-100 py-2.5 fw-medium">
+                <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg w-100 fw-medium text-nowrap" style="height: calc(3.5rem + 2px);">
                   Kalkulasi Tagihan
                 </button>
               </div>
@@ -43,7 +43,7 @@ const KasirModule = {
           <!-- Kiri (7 Kolom): Rincian Komponen Invoice Tagihan -->
           <div class="col-12 col-lg-7">
             <div class="card shadow-sm border-0 h-100">
-              <div class="card-header bg-white py-3 d-flex justify-between align-items-center border-bottom-0">
+              <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
                 <h3 class="card-title h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
                   <i class="bi bi-receipt me-2 text-primary"></i> Rincian Komponen Biaya
                 </h3>
@@ -52,7 +52,7 @@ const KasirModule = {
               
               <div class="card-body px-4 pt-2 pb-4">
                 <!-- Manifes Detail Pasien -->
-                <div class="row g-2 bg-light p-3 rounded-3 border mb-4 text-secondary small">
+                <div class="row g-2 bg-light p-3 rounded-3 border mb-4 text-secondary small mx-0">
                   <div class="col-6">No. RM: <span id="invoice-no-rm" class="fw-bold text-dark"></span></div>
                   <div class="col-6">Nama Pasien: <span id="invoice-nama" class="fw-bold text-dark"></span></div>
                 </div>
@@ -87,7 +87,7 @@ const KasirModule = {
                 <!-- Grand Total Display -->
                 <div class="card bg-dark text-white border-0 shadow-sm">
                   <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                    <span class="small text-uppercase tracking-wider fw-bold text-light-opacity">Total Tagihan Bersih (Grand Total)</span>
+                    <span class="small text-uppercase tracking-wider fw-bold text-white-50">Total Tagihan Bersih (Grand Total)</span>
                     <span id="invoice-grand-total" class="h3 fw-black text-success mb-0">Rp 0</span>
                   </div>
                 </div>
@@ -136,8 +136,8 @@ const KasirModule = {
         </div>
 
         <!-- Empty State Workspace -->
-        <div id="kasir-empty-workspace" class="card shadow-sm border-0 text-center py-5">
-          <div class="card-body text-muted border-0 py-4 italic">
+        <div id="kasir-empty-workspace" class="card shadow-sm border-0 text-center py-5 mb-4">
+          <div class="card-body text-muted py-4 italic">
             <i class="bi bi-inboxes text-secondary h1 d-block mb-3"></i>
             Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
           </div>
@@ -145,7 +145,6 @@ const KasirModule = {
       </div>
     `;
   },
-
   init: function() {
     this.activeBillingData = null;
   },
