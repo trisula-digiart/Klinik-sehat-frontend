@@ -1,7 +1,7 @@
 /**
  * kasir.js
  * Modul Frontend untuk Billing Kasir, Akumulasi Biaya Otomatis, Settlement Transaksi, dan Cetak Invoice
- * Standardisasi Template Bootstrap 5 (adminhmd-1.0.0)
+ * Standardisasi Template Bootstrap 5 (adminhmd-1.0.0) - Override Mode Aktif
  */
 
 const KasirModule = {
@@ -32,7 +32,7 @@ const KasirModule = {
               </button>
             </div>
             <div class="p-4 bg-white border-top">
-              <!-- Kotak Pencarian Manual (Tetap dipertahankan sebagai opsi cadangan) -->
+              <!-- Kotak Pencarian Manual -->
               <div class="row g-3 align-items-end mb-4">
                 <div class="col-12 col-md-9">
                   <label class="form-label small fw-bold text-uppercase text-muted tracking-wider mb-2">
@@ -81,7 +81,7 @@ const KasirModule = {
               <div class="panel h-100">
                 <div class="panel-header py-3 d-flex justify-content-between align-items-center">
                   <h3 class="h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
-                    <i class="bi bi-receipt me-2 text-primary"></i> Rincian Komponen Biaya
+                    <i class="bi bi-receipt me-2 text-primary"></i> Rincian Komponen Biaya (Dapat Diedit)
                   </h3>
                   <span id="invoice-penjamin-badge" class="badge bg-secondary px-2.5 py-1.5">-</span>
                 </div>
@@ -93,29 +93,51 @@ const KasirModule = {
                     <div class="col-6">Nama Pasien: <span id="invoice-nama" class="fw-bold text-dark"></span></div>
                   </div>
 
-                  <!-- Rincian Itemized Harga -->
-                  <div class="list-group list-group-flush mb-4">
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                      <span class="text-secondary">Biaya Pendaftaran / Registrasi Awal</span>
-                      <span id="cost-registrasi" class="fw-bold text-dark">Rp 0</span>
+                  <!-- Rincian Itemized Harga dengan Input Terbuka untuk Kasir Override -->
+                  <div class="mb-4">
+                    <div class="row align-items-center mb-3">
+                      <div class="col-7"><span class="text-secondary small fw-medium">Biaya Pendaftaran / Registrasi Awal</span></div>
+                      <div class="col-5">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light text-dark fw-bold">Rp</span>
+                          <input type="number" id="cost-registrasi" oninput="KasirModule.hitungTotalReaktif()" class="form-control text-end fw-bold text-dark">
+                        </div>
+                      </div>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                      <span class="text-secondary">Biaya Pemeriksaan Klinis Umum/Spesialis</span>
-                      <span id="cost-periksa" class="fw-bold text-dark">Rp 0</span>
+
+                    <div class="row align-items-center mb-3">
+                      <div class="col-7"><span class="text-secondary small fw-medium">Biaya Pemeriksaan Klinis Umum/Spesialis</span></div>
+                      <div class="col-5">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light text-dark fw-bold">Rp</span>
+                          <input type="number" id="cost-periksa" oninput="KasirModule.hitungTotalReaktif()" class="form-control text-end fw-bold text-dark">
+                        </div>
+                      </div>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                      <span class="text-secondary">Biaya Tindakan / Terapi Dokter</span>
-                      <span id="cost-tindakan" class="fw-bold text-dark">Rp 0</span>
+
+                    <div class="row align-items-center mb-3">
+                      <div class="col-7"><span class="text-secondary small fw-medium">Biaya Tindakan / Terapi Dokter</span></div>
+                      <div class="col-5">
+                        <div class="input-group input-group-sm">
+                          <span class="input-group-text bg-light text-dark fw-bold">Rp</span>
+                          <input type="number" id="cost-tindakan" oninput="KasirModule.hitungTotalReaktif()" class="form-control text-end fw-bold text-dark">
+                        </div>
+                      </div>
                     </div>
                     
-                    <!-- Sub-blok Apotek -->
-                    <div class="list-group-item px-0 py-3">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-secondary">Akumulasi Total Obat Farmasi (E-Resep)</span>
-                        <span id="cost-obat" class="fw-bold text-dark">Rp 0</span>
+                    <!-- Blok Apotek -->
+                    <div class="border-top pt-3 mb-3">
+                      <div class="row align-items-center mb-2">
+                        <div class="col-7"><span class="text-secondary small fw-medium">Akumulasi Total Obat Farmasi (E-Resep)</span></div>
+                        <div class="col-5">
+                          <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light text-dark fw-bold">Rp</span>
+                            <input type="number" id="cost-obat" oninput="KasirModule.hitungTotalReaktif()" class="form-control text-end fw-bold text-dark">
+                          </div>
+                        </div>
                       </div>
                       <ul id="invoice-detail-obat-list" class="list-unstyled ps-3 small text-muted mb-0">
-                        <!-- List breakdown obat akan masuk di sini -->
+                        <!-- List breakdown obat -->
                       </ul>
                     </div>
                   </div>
@@ -185,9 +207,6 @@ const KasirModule = {
     `;
   },
   
-  /**
-   * Inisialisasi awal modul kasir
-   */
   init: function() {
     this.activeBillingData = null;
     this.loadAntreanKasir();
@@ -207,21 +226,16 @@ const KasirModule = {
     return "Rp " + Number(angka).toLocaleString('id-ID', { minimumFractionDigits: 0 });
   },
 
-  /**
-   * Menarik daftar pasien yang memiliki status butuh pembayaran ('Apotek' atau 'Pembayaran')
-   */
   loadAntreanKasir: async function() {
     const listContainer = document.getElementById('live-antrean-kasir-list');
     if (!listContainer) return;
 
     try {
-      // Menggunakan API listAntrianHariIni yang sudah ada di Main.gs
       const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getAntreanKasir`;
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
       if (res.success && res.data.length > 0) {
-        // Filter pasien yang statusnya masuk ke koridor Kasir/Apotek
         const pasienKasir = res.data.filter(p => 
           p.status.toLowerCase() === 'apotek' || 
           p.status.toLowerCase() === 'pembayaran' ||
@@ -268,9 +282,6 @@ const KasirModule = {
     this.hitungBilling(idAntrian);
   },
 
-  /**
-   * Menembak GET API ke server GAS untuk kalkulasi komponen biaya agregat secara otomatis
-   */
   hitungBilling: async function(idAntrian) {
     const workspace = document.getElementById('kasir-workspace');
     const emptyBox = document.getElementById('kasir-empty-workspace');
@@ -287,7 +298,6 @@ const KasirModule = {
       if (res.success) {
         this.activeBillingData = res.data;
         
-        // Suntikkan data manifest pasien
         document.getElementById('invoice-no-rm').innerText = res.data.no_rm;
         document.getElementById('invoice-nama').innerText = res.data.nama_pasien;
         
@@ -297,14 +307,15 @@ const KasirModule = {
           ? "badge bg-primary px-3 py-2 fw-bold"
           : "badge bg-warning text-dark px-3 py-2 fw-bold";
 
-        // Suntikkan nominal komponen harga
-        document.getElementById('cost-registrasi').innerText = this.formatRupiah(res.data.biaya_registrasi);
-        document.getElementById('cost-periksa').innerText = this.formatRupiah(res.data.biaya_pemeriksaan);
-        document.getElementById('cost-tindakan').innerText = this.formatRupiah(res.data.biaya_tindakan);
-        document.getElementById('cost-obat').innerText = this.formatRupiah(res.data.biaya_obat);
+        // Pasang value awal ke input agar kasir bisa mengedit secara dinamis
+        document.getElementById('cost-registrasi').value = res.data.biaya_registrasi;
+        document.getElementById('cost-periksa').value = res.data.biaya_pemeriksaan;
+        document.getElementById('cost-tindakan').value = res.data.biaya_tindakan;
+        document.getElementById('cost-obat').value = res.data.biaya_obat;
+        
+        // Kalkulasi awal Grand Total
         document.getElementById('invoice-grand-total').innerText = this.formatRupiah(res.data.total_tagihan);
 
-        // Render manifes rincian obat detail item jika ada
         const listObat = document.getElementById('invoice-detail-obat-list');
         listObat.innerHTML = '';
         if (res.data.detail_obat && res.data.detail_obat.length > 0) {
@@ -315,14 +326,11 @@ const KasirModule = {
           listObat.innerHTML = '<li class="italic text-muted small pe-none">Tidak ada rincian konsumsi obat farmasi.</li>';
         }
 
-        // Set default value form bayar
         document.getElementById('settle-bayar-nominal').value = res.data.total_tagihan;
         document.getElementById('settle-kembalian-text').innerText = "Rp 0";
 
         emptyBox.classList.add('d-none');
         workspace.classList.remove('d-none');
-        
-        // Naikkan window focus ke workspace area pembukuan biaya
         workspace.scrollIntoView({ behavior: 'smooth' });
       } else {
         emptyBox.querySelector('.card-body').innerText = res.message || "Data transaksi antrean tidak ditemukan atau sudah diselesaikan.";
@@ -332,6 +340,32 @@ const KasirModule = {
       emptyBox.querySelector('.card-body').innerText = "Gagal memproses hitung invoice kasir.";
       this.showAlert("Error: Sambungan REST API bermasalah.", false);
     }
+  },
+
+  /**
+   * Menghitung grand total reaktif secara instan di UI ketika kasir memanipulasi nilai input
+   */
+  hitungTotalReaktif: function() {
+    if (!this.activeBillingData) return;
+
+    const reg = Number(document.getElementById('cost-registrasi').value) || 0;
+    const prks = Number(document.getElementById('cost-periksa').value) || 0;
+    const tndk = Number(document.getElementById('cost-tindakan').value) || 0;
+    const obt = Number(document.getElementById('cost-obat').value) || 0;
+
+    const newGrandTotal = reg + prks + tndk + obt;
+    
+    // Sinkronkan state lokal agar akurat saat proses cetak & pembayaran
+    this.activeBillingData.biaya_registrasi = reg;
+    this.activeBillingData.biaya_pemeriksaan = prks;
+    this.activeBillingData.biaya_tindakan = tndk;
+    this.activeBillingData.biaya_obat = obt;
+    this.activeBillingData.total_tagihan = newGrandTotal;
+
+    document.getElementById('invoice-grand-total').innerText = this.formatRupiah(newGrandTotal);
+    
+    // Perbarui kalkulasi kembalian
+    this.hitungKembalian();
   },
 
   hitungKembalian: function() {
@@ -351,7 +385,7 @@ const KasirModule = {
   },
 
   /**
-   * Menembak POST API ke server untuk eksekusi final settlement status pembayaran lunas
+   * Mengirim payload ke server dengan nilai nominal kustom hasil override kasir
    */
   prosesPelunasan: async function() {
     if (!this.activeBillingData) return;
@@ -390,10 +424,8 @@ const KasirModule = {
 
       if (res.success) {
         this.showAlert(`Sukses! Pembayaran berhasil diselesaikan. Invoice: ${res.data.id_invoice}`);
-        
         this.cetakNotaInvoiceFisik(res.data.id_invoice);
 
-        // Reset workspace & reload antrean live terbaru
         this.activeBillingData = null;
         document.getElementById('kasir-search-id').value = '';
         document.getElementById('kasir-workspace').classList.add('d-none');
@@ -403,7 +435,6 @@ const KasirModule = {
           Pilih salah satu pasien di atas untuk memuat rincian billing tagihan resmi klinik.
         `;
         
-        // Reload tabel otomatis
         this.loadAntreanKasir();
       } else {
         this.showAlert(res.message || "Gagal memproses log kassa kasir.", false);
@@ -427,7 +458,7 @@ const KasirModule = {
     let itemsObatHTML = '';
     if (data.detail_obat && data.detail_obat.length > 0) {
       data.detail_obat.forEach(o => {
-        itemsObatHTML += `<p style="text-align:left; margin:2px 0;">${o.nama_obat}<br> &nbsp;&nbsp; ${o.jumlah} x ${o.harga_satuan} = ${o.subtotal}</p>`;
+        itemsObatHTML += `<p style="text-align:left; margin:2px 0;">${o.nama_obat}<br> &nbsp;&nbsp; ${o.jumlah} x ${this.formatRupiah(o.harga_satuan)} = ${this.formatRupiah(o.subtotal)}</p>`;
       });
     }
 
@@ -456,14 +487,15 @@ const KasirModule = {
         </p>
         <div class="line"></div>
         
-        <div class="flex-row"><span>Registrasi:</span><span>${data.biaya_registrasi}</span></div>
-        <div class="flex-row"><span>Pemeriksaan:</span><span>${data.biaya_pemeriksaan}</span></div>
-        <div class="flex-row"><span>Tindakan:</span><span>${data.biaya_tindakan}</span></div>
+        <div class="flex-row"><span>Registrasi:</span><span>${this.formatRupiah(data.biaya_registrasi)}</span></div>
+        <div class="flex-row"><span>Pemeriksaan:</span><span>${this.formatRupiah(data.biaya_pemeriksaan)}</span></div>
+        <div class="flex-row"><span>Tindakan:</span><span>${this.formatRupiah(data.biaya_tindakan)}</span></div>
+        <div class="flex-row"><span>Obat-obatan:</span><span>${this.formatRupiah(data.biaya_obat)}</span></div>
         
         ${itemsObatHTML ? '<div class="line"></div>' + itemsObatHTML : ''}
         
         <div class="line"></div>
-        <div class="flex-row bold-text"><span>TOTAL:</span><span>${data.total_tagihan}</span></div>
+        <div class="flex-row bold-text"><span>TOTAL:</span><span>${this.formatRupiah(data.total_tagihan)}</span></div>
         <div class="flex-row"><span>Metode:</span><span>${metode}</span></div>
         <div class="flex-row bold-text"><span>Status:</span><span>LUNAS</span></div>
         <div class="line"></div>
@@ -479,5 +511,4 @@ const KasirModule = {
   }
 };
 
-// Daftarkan ke scope window utama secara aman
 window.KasirModule = KasirModule;
