@@ -103,8 +103,16 @@
   
   <!-- 4. Core SPA Router Engine (WAJIB PALING BAWAH DAN HANYA SATU) -->
   <script src="assets/js/app.js"></script>
-  
-
+  <script>
+    // Global variable override untuk menjinakkan main.js bawaan template agar tidak memicu 404 avatar
+    window.adminHMDUser = {
+      name: "Admin Klinik",
+      workspace: "Klinik Sehat Operasional",
+      avatar: "assets/js/images/avatar/avatar.jpg"
+    };
+  </script>
+</body>
+</html>
   <script>
     // Global variable override untuk menjinakkan main.js bawaan template agar tidak memicu 404 avatar
     window.adminHMDUser = {
