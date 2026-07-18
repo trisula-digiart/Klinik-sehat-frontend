@@ -1,16 +1,12 @@
 /**
  * pendaftaran.js
- * Modul Frontend Pendaftaran Pasien Baru & Fast-Track Antrean Poliklinik
- * Aman dari bentrokan global variabel (Safe State Pattern)
+ * Modul Frontend Pendaftaran Pasien Baru & Monitor Pending Queue Antrean Poliklinik
+ * Versi Fast-Track UI Terintegrasi Penuh
  */
 
 window.PendaftaranModule = window.PendaftaranModule || {
-  // Tempat menyimpan data pencarian pasien aktif di panel kanan
-  pasienDitemukan: null,
+  pasienTerpilih: null,
 
-  /**
-   * Merender komponen UI layout pendaftaran berdasarkan screenshot template
-   */
   render: function() {
     return `
       <div class="row pair-fade-in">
@@ -19,14 +15,14 @@ window.PendaftaranModule = window.PendaftaranModule || {
         </div>
 
         <!-- PANEL KIRI: Input Form Pendaftaran Pasien Baru -->
-        <div class="col-12 col-lg-6 mb-4">
-          <div class="panel">
-            <div class="panel-header py-3">
-              <h2 class="h5 mb-0 section-title">
-                <span><i class="bi bi-person-plus me-2 text-primary"></i>Pasien Baru</span>
+        <div class="col-12 col-lg-5 mb-4">
+          <div class="panel shadow-sm border border-light-subtle rounded-3">
+            <div class="panel-header py-3 px-4 bg-light border-bottom">
+              <h2 class="h6 mb-0 text-dark fw-bold">
+                <i class="bi bi-person-plus me-2 text-primary"></i>Pasien Baru
               </h2>
             </div>
-            <div class="p-4 bg-white border-top">
+            <div class="p-4 bg-white">
               <form id="form-pasien-baru" onsubmit="PendaftaranModule.handleDaftarPasien(event)">
                 <div class="mb-3">
                   <label class="form-label small fw-bold text-uppercase text-muted">NIK (Nomor Induk Kependudukan)</label>
@@ -64,7 +60,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
                   <label class="form-label small fw-bold text-uppercase text-muted">Alamat Domisili</label>
                   <textarea id="reg-alamat" class="form-control" rows="3" required placeholder="Alamat lengkap tempat tinggal saat ini"></textarea>
                 </div>
-                <button type="submit" id="btn-submit-pasien" class="btn btn-primary w-100 py-2.5 fw-bold">
+                <button type="submit" id="btn-submit-pasien" class="btn btn-primary w-100 py-2.5 fw-bold text-white shadow-sm">
                   <i class="bi bi-person-check me-2"></i>Daftarkan Pasien Baru
                 </button>
               </form>
@@ -72,28 +68,53 @@ window.PendaftaranModule = window.PendaftaranModule || {
           </div>
         </div>
 
-        <!-- PANEL KANAN: Cari & Distribusi Antrean Kerja Poliklinik -->
-        <div class="col-12 col-lg-6 mb-4">
-          <div class="panel h-100">
-            <div class="panel-header py-3">
-              <h2 class="h5 mb-0 section-title">
-                <span><i class="bi bi-search me-2 text-primary"></i>Cari & Daftarkan ke Antrean Poliklinik</span>
+        <!-- PANEL KANAN: Cari & Monitor Queue Alokasi Poliklinik Kerja -->
+        <div class="col-12 col-lg-7 mb-4">
+          <div class="panel shadow-sm border border-light-subtle rounded-3 h-100 bg-white">
+            <div class="panel-header py-3 px-4 bg-light border-bottom">
+              <h2 class="h6 mb-0 text-dark fw-bold">
+                <i class="bi bi-search me-2 text-primary"></i>Cari & Daftarkan ke Antrean Poliklinik
               </h2>
             </div>
-            <div class="p-4 bg-white border-top">
-              <!-- Kolom Pencarian Global -->
-              <div class="input-group mb-4">
-                <input type="text" id="pendaftaran-search-key" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control form-control-lg">
-                <button onclick="PendaftaranModule.cariPasien()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
+            <div class="p-4">
+              <!-- Bar Pencarian Global -->
+              <div class="input-group mb-4 shadow-sm rounded">
+                <input type="text" id="pendaftaran-search-key" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control form-control-lg border-end-0">
+                <button onclick="PendaftaranModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
               </div>
 
-              <!-- Slot Container Dinamis Hasil Distribusi Data Pasien -->
-              <div id="antrean-action-workspace">
-                <div class="text-center py-5 text-muted border border-dashed rounded-3">
-                  <i class="bi bi-card-list text-secondary h1 d-block mb-3"></i>
-                  Silakan ketik kata kunci pencarian di atas atau daftarkan pasien baru untuk memproses antrean.
+              <!-- Area Kerja Pemrosesan Pasien Aktif (Bisa via Submit Baru / via Klik Baris Tabel) -->
+              <div id="antrean-execution-card" class="d-none mb-4"></div>
+
+              <!-- LIVE PENDING QUEUE MONITOR TABLE -->
+              <div class="mt-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                    <i class="bi bi-collection-play me-2 text-warning"></i>Pasien Belum Masuk Antrean Kerja Hari Ini
+                  </h3>
+                  <button onclick="PendaftaranModule.loadPendingQueue()" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Refresh data">
+                    <i class="bi bi-arrow-clockwise"></i> Sync
+                  </button>
+                </div>
+                <div class="table-responsive border rounded-3 bg-light" style="max-height: 380px; overflow-y: auto;">
+                  <table class="table table-hover align-middle mb-0 small bg-white text-nowrap">
+                    <thead class="table-light position-sticky top-0 shadow-sm z-1 fw-bold text-muted">
+                      <tr>
+                        <th class="py-2 px-3">No. RM</th>
+                        <th class="py-2">Nama Pasien</th>
+                        <th class="py-2">Penjamin</th>
+                        <th class="py-2 text-center">Aksi Kerja</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pendaftaran-pending-tbody">
+                      <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Memuat antrean tunda harian...</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -102,35 +123,75 @@ window.PendaftaranModule = window.PendaftaranModule || {
   },
 
   init: function() {
-    this.pasienDitemukan = null;
+    this.pasienTerpilih = null;
+    this.loadPendingQueue();
   },
 
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('pendaftaran-alert');
     if (!alertBox) return;
     alertBox.innerText = message;
-    alertBox.className = `alert p-3 mb-4 d-block ${isSuccess ? 'alert-success border-success' : 'alert-danger border-danger'}`;
+    alertBox.className = `alert p-3 mb-4 d-block pair-fade-in ${isSuccess ? 'alert-success border-success' : 'alert-danger border-danger'}`;
     setTimeout(() => alertBox.classList.add('d-none'), 5000);
   },
 
   /**
-   * Mengirim data form pendaftaran ke `Main.gs`
+   * Menarik list pasien terdaftar hari ini yang belum masuk antrean kerja
+   */
+  loadPendingQueue: async function() {
+    const tbody = document.getElementById('pendaftaran-pending-tbody');
+    if (!tbody) return;
+
+    try {
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getPasienPendingHariIni`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+      const res = await response.json();
+
+      if (res.success && res.data && res.data.length > 0) {
+        tbody.innerHTML = res.data.map(pasien => `
+          <tr class="pair-fade-in">
+            <td class="py-2 px-3 fw-bold text-primary">${pasien.no_rm}</td>
+            <td class="py-2 fw-medium">${pasien.nama}</td>
+            <td class="py-2"><span class="badge bg-secondary-subtle text-secondary border px-2 py-0.5">${pasien.jenis_penjamin || 'Umum'}</span></td>
+            <td class="py-2 text-center">
+              <button onclick='PendaftaranModule.pilihPasienEksekusi(${JSON.stringify(pasien)})' class="btn btn-xs btn-outline-primary fw-bold py-0.5 px-2">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Proses
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center py-5 text-muted">
+              <i class="bi bi-check-circle text-success h3 d-block mb-2"></i>
+              Semua pasien terdaftar telah dialokasikan ke poliklinik.
+            </td>
+          </tr>`;
+      }
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger fw-medium">Gagal melakukan sinkronisasi database.</td></tr>`;
+    }
+  },
+
+  /**
+   * Mengirim data form pendaftaran ke backend `Main.gs`
    */
   handleDaftarPasien: async function(event) {
     event.preventDefault();
     const btn = document.getElementById('btn-submit-pasien');
     btn.disabled = true;
-    btn.innerText = "Memproses Database Pasien Baru...";
+    btn.innerText = "Mendaftarkan ke Database...";
 
     const payload = {
       api_key: CONFIG.API_KEY,
       action: 'tambahPasien',
       nik: document.getElementById('reg-nik').value.trim(),
       nama: document.getElementById('reg-nama').value.trim(),
-      tgl_lahir: document.getElementById('reg-tgllahir').value,
-      gender: document.getElementById('reg-gender').value,
-      penjamin: document.getElementById('reg-penjamin').value,
-      hp: document.getElementById('reg-hp').value.trim(),
+      tanggal_lahir: document.getElementById('reg-tgllahir').value,
+      jenis_kelamin: document.getElementById('reg-gender').value,
+      jenis_penjamin: document.getElementById('reg-penjamin').value,
+      nomor_hp: document.getElementById('reg-hp').value.trim(),
       alamat: document.getElementById('reg-alamat').value.trim()
     };
 
@@ -147,32 +208,31 @@ window.PendaftaranModule = window.PendaftaranModule || {
         this.showAlert(`Sukses mendaftarkan pasien! RM Baru: ${res.data.no_rm}`);
         document.getElementById('form-pasien-baru').reset();
 
-        // >>> LOGIC FAST-TRACK DISINI: Lempar no_rm baru ke form kanan & render otomatis <<<
+        // FAST-TRACK UX: Langsung lempar nomor RM ke form kanan dan tampilkan form eksekusi poliklinik
         document.getElementById('pendaftaran-search-key').value = res.data.no_rm;
-        this.renderPasienTerpilih(res.data);
+        this.pilihPasienEksekusi(res.data);
       } else {
-        this.showAlert(res.message || "Gagal menyimpan pasien baru.", false);
+        this.showAlert(res.message || "Gagal menyimpan pasien.", false);
       }
     } catch (e) {
-      this.showAlert("Error: Sambungan internet server terputus.", false);
+      this.showAlert("Error: Sambungan internet terputus.", false);
     } finally {
       btn.disabled = false;
       btn.innerHTML = `<i class="bi bi-person-check me-2"></i>Daftarkan Pasien Baru`;
+      this.loadPendingQueue(); // Segarkan data tabel monitor
     }
   },
 
   /**
    * Melakukan pencarian manual untuk pasien lama
    */
-  cariPasien: async function() {
+  cariPasienManual: async function() {
     const keyword = document.getElementById('pendaftaran-search-key').value.trim();
-    if (!keyword) {
-      alert("Masukkan NIK, Nama, atau No RM untuk mencari!");
-      return;
-    }
+    if (!keyword) return alert("Masukkan NIK, Nama, atau No RM untuk mencari!");
 
-    const workspace = document.getElementById('antrean-action-workspace');
-    workspace.innerHTML = `<div class="text-center py-4 text-secondary">Sedang mencari data pasien di database...</div>`;
+    const exCard = document.getElementById('antrean-execution-card');
+    exCard.className = "d-block p-3 bg-light text-center text-muted small border rounded-3";
+    exCard.innerHTML = "Mencari pasien...";
 
     try {
       const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=cariPasien&keyword=${encodeURIComponent(keyword)}`;
@@ -180,78 +240,90 @@ window.PendaftaranModule = window.PendaftaranModule || {
       const res = await response.json();
 
       if (res.success && res.data && res.data.length > 0) {
-        // Ambil data pertama hasil pencarian
-        this.renderPasienTerpilih(res.data[0]);
+        // Mapping schema search ke format form eksekusi
+        const pasien = res.data[0];
+        pasien.jenis_penjamin = pasien.jenis_penjamin || pasien.penjamin; 
+        this.pilihPasienEksekusi(pasien);
       } else {
-        workspace.innerHTML = `
-          <div class="alert alert-warning text-center">
-            Pasien tidak ditemukan. Periksa kembali kata kunci atau daftarkan baru di form sebelah kiri.
-          </div>`;
+        exCard.className = "alert alert-warning text-center small p-3";
+        exCard.innerHTML = "Pasien tidak ditemukan. Gunakan form kiri untuk mendaftarkan pasien baru.";
       }
     } catch (e) {
-      workspace.innerHTML = `<div class="alert alert-danger text-center">Gagal terhubung dengan server database.</div>`;
+      exCard.className = "alert alert-danger text-center small p-3";
+      exCard.innerHTML = "Gagal terhubung dengan server database klinik.";
     }
   },
 
   /**
-   * Menyuntikkan detail data pasien ke panel kanan & memunculkan form pilihan Poliklinik Kerja
+   * Menampilkan form alokasi poliklinik untuk pasien aktif yang dipilih
    */
-  renderPasienTerpilih: function(pasien) {
-    this.pasienDitemukan = pasien;
-    const workspace = document.getElementById('antrean-action-workspace');
+  pilihPasienEksekusi: function(pasien) {
+    this.pasienTerpilih = pasien;
+    const exCard = document.getElementById('antrean-execution-card');
+    exCard.className = "p-4 bg-light rounded-3 border border-primary-subtle mb-4 pair-fade-in d-block shadow-sm";
 
-    workspace.innerHTML = `
-      <div class="p-3 bg-light rounded-3 border border-primary-subtle mb-4 pair-fade-in">
-        <small class="text-uppercase text-muted fw-bold d-block mb-2">Data Pasien Ditemukan:</small>
-        <div class="row g-2 small">
-          <div class="col-6">No. RM: <strong class="text-dark d-block">${pasien.no_rm}</strong></div>
-          <div class="col-6">Nama Pasien: <strong class="text-dark d-block">${pasien.nama}</strong></div>
-          <div class="col-6">NIK: <span class="text-secondary d-block">${pasien.nik}</span></div>
-          <div class="col-6">Penjamin: <span class="badge bg-primary px-2 py-1">${pasien.penjamin || 'Umum'}</span></div>
+    exCard.innerHTML = `
+      <div class="row g-2 small border-bottom pb-3 mb-3 text-dark">
+        <div class="col-6 col-sm-3">No. RM: <strong class="text-primary d-block font-monospace">${pasien.no_rm}</strong></div>
+        <div class="col-6 col-sm-4">Nama Pasien: <strong class="d-block">${pasien.nama}</strong></div>
+        <div class="col-6 col-sm-3">NIK: <span class="text-secondary d-block font-monospace">${pasien.nik}</span></div>
+        <div class="col-6 col-sm-2 text-end">
+          <span class="badge bg-primary px-2 py-1">${pasien.jenis_penjamin || 'Umum'}</span>
         </div>
       </div>
 
-      <div class="panel border p-3 rounded-3 bg-white pair-fade-in">
-        <h4 class="h6 fw-bold text-uppercase text-muted mb-3">Tentukan Tujuan Poliklinik & Dokter:</h4>
-        <div class="mb-3">
-          <label class="form-label small fw-medium">Poliklinik Tujuan</label>
-          <select id="antrean-poli" class="form-select">
+      <div class="row g-3">
+        <div class="col-12 col-sm-6">
+          <label class="form-label small fw-bold text-muted">Poliklinik Tujuan</label>
+          <select id="antrean-poli" class="form-select form-select-sm">
             <option value="Poli Umum">Poli Umum (Prefix A)</option>
             <option value="Poli Gigi">Poli Gigi (Prefix B)</option>
             <option value="Poli KIA">Poli KIA (Prefix C)</option>
           </select>
         </div>
-        <div class="mb-4">
-          <label class="form-label small fw-medium">Dokter Spesialis / Pemeriksa</label>
-          <select id="antrean-dokter" class="form-select">
+        <div class="col-12 col-sm-6">
+          <label class="form-label small fw-bold text-muted">Dokter Pemeriksa</label>
+          <select id="antrean-dokter" class="form-select form-select-sm">
             <option value="dr. Ahmad Faisal">dr. Ahmad Faisal</option>
             <option value="drg. Citra Lestari">drg. Citra Lestari</option>
             <option value="dr. Eka Wijaya">dr. Eka Wijaya</option>
           </select>
         </div>
-        <button onclick="PendaftaranModule.kirimKeAntreanKerja()" id="btn-submit-antrean" class="btn btn-success w-100 py-2.5 fw-bold">
-          <i class="bi bi-box-arrow-in-right me-2"></i>Masukkan ke Antrean Kerja
-        </button>
+        <div class="col-12 text-end mt-3">
+          <button onclick="PendaftaranModule.batalEksekusi()" class="btn btn-sm btn-light border me-2 fw-medium px-3">Batal</button>
+          <button onclick="PendaftaranModule.kirimKeAntreanKerja()" id="btn-submit-antrean" class="btn btn-sm btn-success fw-bold px-4 text-white shadow-sm">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Masukkan ke Antrean Kerja
+          </button>
+        </div>
       </div>
     `;
+    document.getElementById('pendaftaran-search-key').value = pasien.no_rm;
+  },
+
+  batalEksekusi: function() {
+    this.pasienTerpilih = null;
+    document.getElementById('pendaftaran-search-key').value = '';
+    const exCard = document.getElementById('antrean-execution-card');
+    exCard.className = "d-none";
+    exCard.innerHTML = "";
   },
 
   /**
-   * Menembak POST API `action=tambahAntrian` untuk memasukkan pasien ke antrean live hari ini
+   * Menembak POST API action=tambahAntrian ke ControllerAntrian.gs
    */
   kirimKeAntreanKerja: async function() {
-    if (!this.pasienDitemukan) return;
+    if (!this.pasienTerpilih) return;
 
     const btn = document.getElementById('btn-submit-antrean');
     btn.disabled = true;
-    btn.innerText = "Mengalokasikan Nomor Urut Antrean...";
+    btn.innerText = "Memproses...";
 
     const payload = {
       api_key: CONFIG.API_KEY,
       action: 'tambahAntrian',
-      no_rm: this.pasienDitemukan.no_rm,
-      nama_poli: document.getElementById('antrean-poli').value,
-      nama_dokter: document.getElementById('antrean-dokter').value
+      no_rm: this.pasienTerpilih.no_rm,
+      id_poli: document.getElementById('antrean-poli').value,
+      id_dokter: document.getElementById('antrean-dokter').value
     };
 
     try {
@@ -264,26 +336,15 @@ window.PendaftaranModule = window.PendaftaranModule || {
       const res = await response.json();
 
       if (res.success) {
-        alert(`Sukses! Pasien berhasil masuk antrean poliklinik dengan Nomor Urut: ${res.data.no_antrian}`);
-        
-        // Reset Workspace Kanan kembali ke kondisi awal kosong
-        this.pasienDitemukan = null;
-        document.getElementById('pendaftaran-search-key').value = '';
-        document.getElementById('antrean-action-workspace').innerHTML = `
-          <div class="text-center py-5 text-muted border border-dashed rounded-3">
-            <i class="bi bi-card-list text-secondary h1 d-block mb-3"></i>
-            Silakan ketik kata kunci pencarian di atas atau daftarkan pasien baru untuk memproses antrean.
-          </div>`;
+        alert(`Sukses! Pasien masuk antrean kerja dengan Nomor Urut: ${res.data.no_antrian}`);
+        this.batalEksekusi();
       } else {
-        this.showAlert(res.message || "Gagal memasukkan ke antrean.", false);
+        this.showAlert(res.message || "Gagal mengalokasikan nomor antrean.", false);
       }
     } catch (e) {
       this.showAlert("Error: Sambungan internet server terputus.", false);
     } finally {
-      if(btn) {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-box-arrow-in-right me-2"></i>Masukkan ke Antrean Kerja`;
-      }
+      this.loadPendingQueue(); // Segarkan data tabel pending monitor harian
     }
   }
 };
