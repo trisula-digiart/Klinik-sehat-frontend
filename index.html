@@ -6,11 +6,8 @@
   <meta name="description" content="Sistem Informasi Manajemen Klinik Sehat">
   <title>Klinik Sehat | Dashboard</title>
 
-  <!-- PENYESUAIAN JALUR: Menembak langsung ke dalam subfolder assets/js/ sesuai visual VS Code lo -->
   <link rel="stylesheet" href="assets/js/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/js/css/style.css">
-  
-  <!-- Jaminan Visual: Menggunakan CDN Icon agar simbol menu langsung tampil -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <style>
@@ -42,7 +39,7 @@
       <!-- Navbar Header -->
       <nav class="navbar admin-navbar navbar-expand bg-white">
         <div class="container-fluid px-3 px-lg-4">
-          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="sidebar-navigation" aria-expanded="true" aria-label="Toggle sidebar">
+          <button class="sidebar-toggle" type="button" aria-label="Toggle sidebar">
             <span></span>
             <span></span>
             <span></span>
@@ -55,7 +52,7 @@
 
           <div class="navbar-actions ms-auto">
             <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
-              <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+              <i class="bi bi-moon-stars" aria-hidden="true"></i>
             </button>
             
             <div class="dropdown">
@@ -71,7 +68,7 @@
         </div>
       </nav>
 
-      <!-- Tempat Konten SPA Mengalir Sesuai Standar adminHMD -->
+      <!-- Tempat Konten SPA Mengalir -->
       <main class="dashboard-content">
         <div class="container-fluid px-3 px-lg-4 py-4" id="main-content-stream">
           <!-- Tampilan Halaman Suntikan SPA -->
@@ -87,45 +84,29 @@
     </div>
   </div>
 
-  <!-- 1. Konfigurasi Global & Core API -->
+  <!-- JavaScript Load Engine -->
   <script src="assets/js/config.js"></script>
-  
-  <!-- 2. Pustaka Pihak Ketiga (Template Bawaan) -->
   <script src="assets/js/bootstrap.bundle.min.js"></script>
 
-  <!-- 3. Modul Aplikasi Operasional Klinik -->
-<script src="assets/js/pasien.js"></script>
-<script src="assets/js/dokter.js"></script>
-<script src="assets/js/antrian.js"></script>
-<script src="assets/js/apotek.js"></script>
-<script src="assets/js/kasir.js"></script>
-<script src="assets/js/rekam_medis.js"></script>
-<script src="assets/js/laporan.js"></script>
+  <!-- Modul Aplikasi Operasional Klinik -->
+  <script src="assets/js/pasien.js"></script>
+  <script src="assets/js/dokter.js"></script>
+  <script src="assets/js/antrian.js"></script>
+  <script src="assets/js/apotek.js"></script>
+  <script src="assets/js/kasir.js"></script>
+  <script src="assets/js/rekam_medis.js"></script>
+  <script src="assets/js/laporan.js"></script>
   <script src="assets/js/jadwal_dokter.js"></script>
   <script src="assets/js/pengguna.js"></script>
   <script src="assets/js/pengaturan.js"></script>
+  <script src="assets/js/app.js"></script>
 
-<script src="assets/js/app.js"></script>
   <script>
-    // Global variable override untuk menjinakkan main.js bawaan template agar tidak memicu 404 avatar
     window.adminHMDUser = {
       name: "Admin Klinik",
       workspace: "Klinik Sehat Operasional",
       avatar: "assets/js/images/avatar/avatar.jpg"
     };
   </script>
-</body>
-</html>
-  <script>
-    // Global variable override untuk menjinakkan main.js bawaan template agar tidak memicu 404 avatar
-    window.adminHMDUser = {
-      name: "Admin Klinik",
-      workspace: "Klinik Sehat Operational",
-      avatar: "assets/js/images/avatar/avatar.jpg"
-    };
-  </script>
-  
-  <!-- JavaScript Engine Framework -->
-  <script src="assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
