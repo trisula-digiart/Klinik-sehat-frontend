@@ -1,6 +1,7 @@
 /**
  * kasir.js
  * Modul Frontend untuk Billing Kasir, Akumulasi Biaya Otomatis, Settlement Transaksi, dan Cetak Invoice
+ * Standardisasi Template Bootstrap 5 (adminhmd-1.0.0)
  */
 
 const KasirModule = {
@@ -8,121 +9,138 @@ const KasirModule = {
   activeBillingData: null,
 
   /**
-   * Merender layout HTML Dashboard Kasir & Billing
+   * Merender layout HTML Dashboard Kasir & Billing berbasis Bootstrap 5
    * @return {String}
    */
   render: function() {
     return `
-      <div class="space-y-6 animate-fadeIn">
-        <!-- Header Halaman -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5 space-y-4 sm:space-y-0">
-          <div>
-            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Billing Kasir & Pembayaran</h2>
-            <p class="text-sm text-slate-500 mt-1">Kalkulasi agregat biaya perawatan, pemilihan metode transaksi, dan cetak invoice pembayaran.</p>
-          </div>
-        </div>
-
-        <!-- Alert Box -->
-        <div id="kasir-alert" class="hidden p-4 rounded-xl text-sm font-medium border transition-all duration-300 mb-4"></div>
+      <div class="container-fluid px-0 pair-fade-in">
+        <!-- Alert Box untuk notifikasi sistem -->
+        <div id="kasir-alert" class="alert d-none role="alert"></div>
 
         <!-- Panel Lookup Input -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row items-end sm:space-x-3 space-y-3 sm:space-y-0">
-          <div class="flex-1 w-full">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Masukkan ID Antrean Aktif (Contoh: ANT-2026...)</label>
-            <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <div class="card shadow-sm mb-4 border-0">
+          <div class="card-body p-4">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-9">
+                <label class="form-label small fw-bold text-uppercase text-muted tracking-wider mb-2">
+                  <i class="bi bi-search me-1"></i> Masukkan ID Antrean Aktif (Contoh: ANT-2026...)
+                </label>
+                <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="form-control form-control-lg">
+              </div>
+              <div class="col-12 col-md-3">
+                <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg w-100 h-100 py-2.5 fw-medium">
+                  Kalkulasi Tagihan
+                </button>
+              </div>
+            </div>
           </div>
-          <button onclick="KasirModule.hitungBilling()" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm px-6 py-2 rounded-lg transition h-10">
-            Kalkulasi Tagihan
-          </button>
         </div>
 
         <!-- Workspace Billing Terkalkulasi -->
-        <div id="kasir-workspace" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div id="kasir-workspace" class="row d-none g-4">
           
           <!-- Kiri (7 Kolom): Rincian Komponen Invoice Tagihan -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-7 space-y-5">
-            <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
-              <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">📋 Rincian Komponen Biaya</h3>
-              <span id="invoice-penjamin-badge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700">-</span>
-            </div>
-
-            <!-- Manifes Detail Pasien -->
-            <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-600">
-              <div>No. RM: <span id="invoice-no-rm" class="font-bold text-slate-800"></span></div>
-              <div>Nama Pasien: <span id="invoice-nama" class="font-bold text-slate-800"></span></div>
-            </div>
-
-            <!-- Rincian Itemized Harga -->
-            <div class="space-y-3 pt-2">
-              <div class="flex justify-between text-sm border-b border-slate-100 pb-2">
-                <span class="text-slate-600">Biaya Pendaftaran / Registrasi Awal</span>
-                <span id="cost-registrasi" class="font-semibold text-slate-800">Rp 0</span>
-              </div>
-              <div class="flex justify-between text-sm border-b border-slate-100 pb-2">
-                <span class="text-slate-600">Biaya Pemeriksaan Klinis Umum/Spesialis</span>
-                <span id="cost-periksa" class="font-semibold text-slate-800">Rp 0</span>
-              </div>
-              <div class="flex justify-between text-sm border-b border-slate-100 pb-2">
-                <span class="text-slate-600">Biaya Tindakan / Terapi Dokter</span>
-                <span id="cost-tindakan" class="font-semibold text-slate-800">Rp 0</span>
+          <div class="col-12 col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header bg-white py-3 d-flex justify-between align-items-center border-bottom-0">
+                <h3 class="card-title h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
+                  <i class="bi bi-receipt me-2 text-primary"></i> Rincian Komponen Biaya
+                </h3>
+                <span id="invoice-penjamin-badge" class="badge bg-secondary">-</span>
               </div>
               
-              <!-- Sub-blok Apotek -->
-              <div class="border-b border-slate-100 pb-2 space-y-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-slate-600">Akumulasi Total Obat Farmasi (E-Resep)</span>
-                  <span id="cost-obat" class="font-semibold text-slate-800">Rp 0</span>
+              <div class="card-body px-4 pt-2 pb-4">
+                <!-- Manifes Detail Pasien -->
+                <div class="row g-2 bg-light p-3 rounded-3 border mb-4 text-secondary small">
+                  <div class="col-6">No. RM: <span id="invoice-no-rm" class="fw-bold text-dark"></span></div>
+                  <div class="col-6">Nama Pasien: <span id="invoice-nama" class="fw-bold text-dark"></span></div>
                 </div>
-                <div id="invoice-detail-obat-list" class="text-xs text-slate-400 pl-4 space-y-1 list-none">
-                  <!-- List breakdown obat akan masuk di sini -->
+
+                <!-- Rincian Itemized Harga -->
+                <div class="list-group list-group-flush mb-4">
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                    <span class="text-secondary">Biaya Pendaftaran / Registrasi Awal</span>
+                    <span id="cost-registrasi" class="fw-bold text-dark">Rp 0</span>
+                  </div>
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                    <span class="text-secondary">Biaya Pemeriksaan Klinis Umum/Spesialis</span>
+                    <span id="cost-periksa" class="fw-bold text-dark">Rp 0</span>
+                  </div>
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                    <span class="text-secondary">Biaya Tindakan / Terapi Dokter</span>
+                    <span id="cost-tindakan" class="fw-bold text-dark">Rp 0</span>
+                  </div>
+                  
+                  <!-- Sub-blok Apotek -->
+                  <div class="list-group-item px-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-secondary">Akumulasi Total Obat Farmasi (E-Resep)</span>
+                      <span id="cost-obat" class="fw-bold text-dark">Rp 0</span>
+                    </div>
+                    <ul id="invoice-detail-obat-list" class="list-unstyled ps-3 small text-muted mb-0">
+                      <!-- List breakdown obat akan masuk di sini -->
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Grand Total Display -->
+                <div class="card bg-dark text-white border-0 shadow-sm">
+                  <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                    <span class="small text-uppercase tracking-wider fw-bold text-light-opacity">Total Tagihan Bersih (Grand Total)</span>
+                    <span id="invoice-grand-total" class="h3 fw-black text-success mb-0">Rp 0</span>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Grand Total Display -->
-            <div class="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow-inner">
-              <span class="text-xs uppercase tracking-wider font-bold text-slate-400">Total Tagihan Bersih (Grand Total)</span>
-              <span id="invoice-grand-total" class="text-xl font-black text-emerald-400">Rp 0</span>
             </div>
           </div>
 
           <!-- Kanan (5 Kolom): Settlement Pembayaran -->
-          <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-5 space-y-5">
-            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">💳 Metode Pembayaran & Pelunasan</h3>
-            
-            <div class="space-y-4 text-sm">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pilih Metode Transaksi</label>
-                <select id="settle-metode" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="Tunai">Tunai (Cash)</option>
-                  <option value="QRIS">QRIS Dinamis</option>
-                  <option value="Transfer">Transfer Bank (VA)</option>
-                  <option value="Debit">Kartu Debit</option>
-                </select>
+          <div class="col-12 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header bg-white py-3 border-bottom-0">
+                <h3 class="card-title h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
+                  <i class="bi bi-wallet2 me-2 text-success"></i> Metode Pembayaran & Pelunasan
+                </h3>
               </div>
+              
+              <div class="card-body px-4 pt-2 pb-4">
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-uppercase text-muted mb-2">Pilih Metode Transaksi</label>
+                  <select id="settle-metode" class="form-select font-medium text-dark">
+                    <option value="Tunai">Tunai (Cash)</option>
+                    <option value="QRIS">QRIS Dinamis</option>
+                    <option value="Transfer">Transfer Bank (VA)</option>
+                    <option value="Debit">Kartu Debit</option>
+                  </select>
+                </div>
 
-              <div id="container-kembalian" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Uang Diterima (Rp)</label>
-                  <input type="number" id="settle-bayar-nominal" oninput="KasirModule.hitungKembalian()" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                <div id="container-kembalian" class="bg-light p-4 rounded-3 border mb-4">
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary mb-2">Jumlah Uang Diterima (Rp)</label>
+                    <input type="number" id="settle-bayar-nominal" oninput="KasirModule.hitungKembalian()" class="form-control">
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center pt-2 border-top border-2 border-white">
+                    <span class="small text-secondary fw-medium">Uang Kembalian:</span>
+                    <span id="settle-kembalian-text" class="fw-bold text-dark h5 mb-0">Rp 0</span>
+                  </div>
                 </div>
-                <div class="flex justify-between items-center text-xs pt-1">
-                  <span class="text-slate-500 font-medium">Uang Kembalian:</span>
-                  <span id="settle-kembalian-text" class="font-bold text-slate-800 text-sm">Rp 0</span>
-                </div>
+
+                <button onclick="KasirModule.prosesPelunasan()" id="btn-proses-bayar" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm">
+                  <i class="bi bi-printer me-2"></i> Cetak Invoice & Selesaikan
+                </button>
               </div>
-
-              <button onclick="KasirModule.prosesPelunasan()" id="btn-proses-bayar" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-3 rounded-xl shadow-md transition duration-150 active:scale-[0.99]">
-                🎯 Cetak Invoice & Selesaikan Transaksi
-              </button>
             </div>
           </div>
 
         </div>
 
         <!-- Empty State Workspace -->
-        <div id="kasir-empty-workspace" class="text-center py-16 bg-white border border-slate-200 rounded-2xl text-slate-400 text-sm italic">
-          Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
+        <div id="kasir-empty-workspace" class="card shadow-sm border-0 text-center py-5">
+          <div class="card-body text-muted border-0 py-4 italic">
+            <i class="bi bi-inboxes text-secondary h1 d-block mb-3"></i>
+            Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
+          </div>
         </div>
       </div>
     `;
@@ -135,10 +153,10 @@ const KasirModule = {
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('kasir-alert');
     alertBox.innerText = message;
-    alertBox.className = `p-4 rounded-xl text-sm font-medium border transition-all duration-300 block mb-4 ${
-      isSuccess ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-600'
+    alertBox.className = `alert p-3 mb-4 d-block ${
+      isSuccess ? 'alert-success border-success' : 'alert-danger border-danger'
     }`;
-    setTimeout(() => alertBox.classList.add('hidden'), 5000);
+    setTimeout(() => alertBox.classList.add('d-none'), 5000);
   },
 
   /**
@@ -161,9 +179,9 @@ const KasirModule = {
       return;
     }
 
-    workspace.classList.add('hidden');
-    emptyBox.innerText = "Sedang menarik kompilasi data billing server...";
-    emptyBox.classList.remove('hidden');
+    workspace.classList.add('d-none');
+    emptyBox.querySelector('.card-body').innerText = "Sedang menarik kompilasi data billing server...";
+    emptyBox.classList.remove('d-none');
 
     try {
       const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getBillingDetail&id_antrian=${encodeURIComponent(idAntrian)}`;
@@ -180,8 +198,8 @@ const KasirModule = {
         const badge = document.getElementById('invoice-penjamin-badge');
         badge.innerText = res.data.jenis_penjamin;
         badge.className = res.data.jenis_penjamin === 'BPJS' 
-          ? "px-2.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800"
-          : "px-2.5 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800";
+          ? "badge bg-primary px-3 py-2 fw-bold"
+          : "badge bg-warning text-dark px-3 py-2 fw-bold";
 
         // Suntikkan nominal komponen harga
         document.getElementById('cost-registrasi').innerText = this.formatRupiah(res.data.biaya_registrasi);
@@ -195,24 +213,24 @@ const KasirModule = {
         listObat.innerHTML = '';
         if (res.data.detail_obat && res.data.detail_obat.length > 0) {
           res.data.detail_obat.forEach(o => {
-            listObat.innerHTML += `<li>• ${o.nama_obat} (Qty: ${o.jumlah} x ${this.formatRupiah(o.harga_satuan)}) = ${this.formatRupiah(o.subtotal)}</li>`;
+            listObat.innerHTML += `<li class="mb-1"><i class="bi bi-dot me-1"></i> ${o.nama_obat} (Qty: ${o.jumlah} x ${this.formatRupiah(o.harga_satuan)}) = ${this.formatRupiah(o.subtotal)}</li>`;
           });
         } else {
-          listObat.innerHTML = '<li class="italic text-slate-400">Tidak ada rincian konsumsi obat farmasi.</li>';
+          listObat.innerHTML = '<li class="italic text-muted small pe-none">Tidak ada rincian konsumsi obat farmasi.</li>';
         }
 
         // Set default value form bayar
         document.getElementById('settle-bayar-nominal').value = res.data.total_tagihan;
         document.getElementById('settle-kembalian-text').innerText = "Rp 0";
 
-        emptyBox.classList.add('hidden');
-        workspace.classList.remove('hidden');
+        emptyBox.classList.add('d-none');
+        workspace.classList.remove('d-none');
       } else {
-        emptyBox.innerText = res.message || "Data transaksi antrean tidak ditemukan atau sudah diselesaikan.";
+        emptyBox.querySelector('.card-body').innerText = res.message || "Data transaksi antrean tidak ditemukan atau sudah diselesaikan.";
         this.activeBillingData = null;
       }
     } catch (e) {
-      emptyBox.innerText = "Gagal memproses hitung invoice kasir.";
+      emptyBox.querySelector('.card-body').innerText = "Gagal memproses hitung invoice kasir.";
       this.showAlert("Error: Sambungan REST API bermasalah.", false);
     }
   },
@@ -229,10 +247,10 @@ const KasirModule = {
     const kembalianText = document.getElementById('settle-kembalian-text');
     if (sisa < 0) {
       kembalianText.innerText = "Uang Kurang!";
-      kembalianText.className = "font-bold text-red-600 text-sm";
+      kembalianText.className = "fw-bold text-danger h5 mb-0";
     } else {
       kembalianText.innerText = this.formatRupiah(sisa);
-      kembalianText.className = "font-bold text-slate-800 text-sm";
+      kembalianText.className = "fw-bold text-dark h5 mb-0";
     }
   },
 
@@ -283,18 +301,21 @@ const KasirModule = {
         // Reset workspace kasir
         this.activeBillingData = null;
         document.getElementById('kasir-search-id').value = '';
-        document.getElementById('kasir-workspace').classList.add('hidden');
-        document.getElementById('kasir-empty-workspace').classList.remove('hidden');
-        document.getElementById('kasir-empty-workspace').innerText = "Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.";
+        document.getElementById('kasir-workspace').classList.add('d-none');
+        document.getElementById('kasir-empty-workspace').classList.remove('d-none');
+        document.getElementById('kasir-empty-workspace').querySelector('.card-body').innerHTML = `
+          <i class="bi bi-inboxes text-secondary h1 d-block mb-3"></i>
+          Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
+        `;
       } else {
         this.showAlert(res.message || "Gagal memproses log kassa kasir.", false);
         btn.disabled = false;
-        btn.innerText = "Cetak Invoice & Selesaikan Transaksi";
+        btn.innerHTML = `<i class="bi bi-printer me-2"></i> Cetak Invoice & Selesaikan`;
       }
     } catch (err) {
       this.showAlert("Error: Sambungan internet API server putus.", false);
       btn.disabled = false;
-      btn.innerText = "Cetak Invoice & Selesaikan Transaksi";
+      btn.innerHTML = `<i class="bi bi-printer me-2"></i> Cetak Invoice & Selesaikan`;
     }
   },
 
@@ -363,5 +384,5 @@ const KasirModule = {
   }
 };
 
-// Daftarkan ke scope window utama
+// Daftarkan ke scope window utama secara aman
 window.KasirModule = KasirModule;
