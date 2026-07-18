@@ -87,11 +87,12 @@ const RekamMedisModule = {
 
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('rm-alert');
+    if (!alertBox) return;
     alertBox.innerText = message;
     alertBox.className = `alert alert-dismissible fade show p-3 rounded-3 mb-4 d-block ${
       isSuccess ? 'alert-success border-success-subtle text-success' : 'alert-danger border-danger-subtle text-danger'
     }`;
-    setTimeout(() => alertBox.className = 'hidden', 5000);
+    setTimeout(() => { if(alertBox) alertBox.className = 'hidden'; }, 5000);
   },
 
   /**
@@ -111,7 +112,6 @@ const RekamMedisModule = {
     streamBox.innerHTML = `<div class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Menarik berkas klinis...</div>`;
 
     try {
-      // Step 1: Cari profil pasien
       const patientUrl = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=cariPasien&keyword=${encodeURIComponent(kw)}`;
       const patientRes = await fetch(patientUrl, { method: 'GET', mode: 'cors' });
       const patientData = await patientRes.json();
@@ -120,7 +120,6 @@ const RekamMedisModule = {
         const pasien = patientData.data[0];
         this.selectedPasienRM = pasien.no_rm;
 
-        // Render Panel Identitas Pasien
         biodataBox.innerHTML = `
           <div class="table-responsive border rounded-3 bg-light p-2 mb-3">
             <table class="table table-sm table-borderless mb-0 align-middle text-muted" style="font-size: 0.8rem;">
@@ -136,7 +135,6 @@ const RekamMedisModule = {
           </div>
         `;
 
-        // Step 2: Tarik Histori SOAP Klinis Pasien
         this.muatAlurKronologisRM(pasien.no_rm);
       } else {
         this.resetWorkspace("Data pasien tidak ditemukan.");
