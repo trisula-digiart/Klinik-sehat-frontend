@@ -87,22 +87,21 @@
     </div>
   </div>
 
-  <!-- JavaScript Engine Framework - Diarahkan langsung ke dalam folder assets/js/ -->
-  <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <!-- 1. Konfigurasi Global & Core API -->
   <script src="assets/js/config.js"></script>
-  <script src="assets/js/app.js"></script>
-  <script src="assets/js/main.js"></script>
+  
+  <!-- 2. Pustaka Pihak Ketiga (Template Bawaan) -->
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Modul Aplikasi Operasional Klinik -->
+  <!-- 3. Modul Aplikasi Operasional Klinik -->
   <script src="assets/js/pasien.js"></script>
   <script src="assets/js/dokter.js"></script>
   <script src="assets/js/antrian.js"></script>
   <script src="assets/js/apotek.js"></script>
-  
-  <!-- Wajib Tambahkan Baris Ini di index.html lo bro -->
   <script src="assets/js/rekam_medis.js"></script>
+  <script src="assets/js/kasir.js"></script>
   
-  <!-- Core SPA Router Engine (Selalu dipaling bawah modul) -->
+  <!-- 4. Core SPA Router Engine (WAJIB PALING BAWAH DAN HANYA SATU) -->
   <script src="assets/js/app.js"></script>
   
 
