@@ -4,6 +4,8 @@
  */
 
 const PasienModule = {
+  selectedPasienRM: null,
+
   /**
    * Merender layout HTML untuk halaman Pendaftaran & Antrean menggunakan komponen asli adminHMD
    * @return {String}
@@ -75,9 +77,9 @@ const PasienModule = {
             </div>
           </div>
 
-          <!-- Kanan: Pencarian Pasien & Check-in Antrean Poli -->
+          <!-- Kanan: Pencarian Pasien, Check-in Antrean Poli & Monitor Harian -->
           <div class="col-12 col-lg-7">
-            <div class="panel h-100">
+            <div class="panel mb-4">
               <div class="panel-header border-b pb-3 mb-4">
                 <h3 class="h5 section-title mb-0">
                   <i class="bi bi-search me-2"></i>Cari & Daftarkan ke Antrean Poliklinik
@@ -149,10 +151,39 @@ const PasienModule = {
                 <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
                 <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>
               </div>
-
             </div>
-          </div>
 
+            <!-- INTEGRASI LIVE MONITOR PANEL BAWAH KANAN (Anti-Clip Grid) -->
+            <div class="panel">
+              <div class="panel-header border-b pb-3 mb-3 d-flex justify-content-between align-items-center">
+                <h3 class="h5 section-title mb-0">
+                  <i class="bi bi-calendar-check me-2 text-warning"></i>Pasien Terdaftar Hari Ini
+                </h3>
+                <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
+                </button>
+              </div>
+              
+              <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 small text-nowrap">
+                  <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
+                    <tr>
+                      <th class="py-2.5 px-3">No. RM</th>
+                      <th class="py-2">Nama Pasien</th>
+                      <th class="py-2">Penjamin</th>
+                      <th class="py-2 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendaftaran-live-monitor-tbody">
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     `;
@@ -162,7 +193,8 @@ const PasienModule = {
    * Inisialisasi Event Listener pasca DOM komponen di-render
    */
   init: function() {
-    // Sesi setup awal jika diperlukan
+    this.selectedPasienRM = null;
+    this.loadLiveMonitor();
   },
 
   showAlert: function(message, isSuccess = true) {
@@ -173,6 +205,70 @@ const PasienModule = {
     }`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => alertBox.className = 'hidden', 5000);
+  },
+
+  /**
+   * Menarik data realtime antrean pasien hari ini dari Apps Script
+   */
+  loadLiveMonitor: async function() {
+    const tbody = document.getElementById('pendaftaran-live-monitor-tbody');
+    if (!tbody) return;
+
+    try {
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getPasienPendingHariIni`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+      const res = await response.json();
+
+      if (res.success && res.data && res.data.length > 0) {
+        tbody.innerHTML = res.data.map(pasien => `
+          <tr>
+            <td class="py-2 px-3 fw-bold font-monospace text-primary">${pasien.no_rm}</td>
+            <td class="py-2 fw-medium text-dark">${pasien.nama}</td>
+            <td class="py-2"><span class="badge ${pasien.jenis_penjamin === 'BPJS' ? 'text-bg-primary' : 'text-bg-warning text-dark'} border px-2 py-0.5">${pasien.jenis_penjamin || 'Umum'}</span></td>
+            <td class="py-2 text-center">
+              <button onclick='PasienModule.pilihPasienDariTabel(${JSON.stringify(pasien)})' class="btn btn-xs btn-primary fw-bold py-0.5 px-2">
+                <i class="bi bi-box-arrow-up me-1"></i> Alokasi
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center py-4 text-muted small">
+              <i class="bi bi-folder-x d-block mb-1 fs-4 text-secondary opacity-50"></i>
+              Belum ada pendaftaran pasien hari ini.
+            </td>
+          </tr>`;
+      }
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger small">Gagal sinkronisasi antrean monitor.</td></tr>`;
+    }
+  },
+
+  /**
+   * Memilih pasien dari live monitor bawah untuk dialokasikan ke form atas
+   */
+  pilihPasienDariTabel: function(pasien) {
+    this.selectedPasienRM = pasien.no_rm;
+    
+    document.getElementById('search-keyword').value = pasien.no_rm;
+    document.getElementById('target-no-rm').innerText = pasien.no_rm;
+    document.getElementById('target-nama').innerText = pasien.nama;
+    document.getElementById('target-nik').innerText = pasien.nik || '-';
+    
+    const penjaminBadge = document.getElementById('target-penjamin');
+    penjaminBadge.innerText = pasien.jenis_penjamin;
+    if (pasien.jenis_penjamin === 'BPJS') {
+      penjaminBadge.className = "badge text-bg-primary mt-1";
+    } else {
+      penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+    }
+
+    document.getElementById('search-empty-placeholder').classList.add('hidden');
+    document.getElementById('search-results-container').classList.remove('hidden');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
   /**
@@ -220,10 +316,9 @@ const PasienModule = {
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru`;
+      this.loadLiveMonitor(); // Otomatis refresh tabel monitor setelah input sukses
     }
   },
-
-  selectedPasienRM: null,
 
   /**
    * Mengambil data pencarian pasien dari API Backend
@@ -255,8 +350,8 @@ const PasienModule = {
         document.getElementById('target-nik').innerText = pasien.nik;
         
         const penjaminBadge = document.getElementById('target-penjamin');
-        penjaminBadge.innerText = pasien.jenis_penjamin;
-        if (pasien.jenis_penjamin === 'BPJS') {
+        penjaminBadge.innerText = pasien.jenis_penjamin || pasien.penjamin || 'Umum';
+        if (penjaminBadge.innerText === 'BPJS') {
           penjaminBadge.className = "badge text-bg-primary mt-1";
         } else {
           penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
@@ -320,6 +415,8 @@ const PasienModule = {
       }
     } catch (err) {
       this.showAlert("Error: Koneksi server bermasalah saat check-in.", false);
+    } finally {
+      this.loadLiveMonitor(); // Sinkronisasi ulang tabel monitor
     }
   }
 };
