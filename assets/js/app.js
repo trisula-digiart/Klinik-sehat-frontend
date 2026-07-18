@@ -3,10 +3,12 @@
  * Core SPA Router Engine - Path Customization for assets/js/ Folder Structure
  */
 
-const AppState = {
+// Pengaman deklarasi ganda variable state SPA
+window.AppState = window.AppState || {
   user: null, 
   currentView: 'dashboard'
 };
+const AppState = window.AppState;
 
 function navigateTo(viewName) {
   if (!AppState.user && viewName !== 'login') {
