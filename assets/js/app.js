@@ -59,9 +59,58 @@ function renderLayout() {
             </div>
           </div>
         </div>
+
+        <!-- WIDGET STATISTIK DASHBOARD KLINIK -->
+        <div class="row g-4 mt-2 animate-fadeIn">
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="panel p-3 bg-white border rounded-3 h-100 d-flex align-items-center">
+              <div class="p-3 rounded-circle bg-primary-subtle text-primary me-3">
+                <i class="bi bi-people-fill fs-3"></i>
+              </div>
+              <div>
+                <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Total Pasien</small>
+                <h3 class="fw-bold mb-0 mt-1">1,248</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="panel p-3 bg-white border rounded-3 h-100 d-flex align-items-center">
+              <div class="p-3 rounded-circle bg-warning-subtle text-warning me-3">
+                <i class="bi bi-hourglass-split fs-3"></i>
+              </div>
+              <div>
+                <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Antrean Aktif</small>
+                <h3 class="fw-bold mb-0 mt-1">18 Pasien</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="panel p-3 bg-white border rounded-3 h-100 d-flex align-items-center">
+              <div class="p-3 rounded-circle bg-success-subtle text-success me-3">
+                <i class="bi bi-check2-circle fs-3"></i>
+              </div>
+              <div>
+                <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Selesai Periksa</small>
+                <h3 class="fw-bold mb-0 mt-1">32 Kasus</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="panel p-3 bg-white border rounded-3 h-100 d-flex align-items-center">
+              <div class="p-3 rounded-circle bg-danger-subtle text-danger me-3">
+                <i class="bi bi-cash-stack fs-3"></i>
+              </div>
+              <div>
+                <small class="text-muted text-uppercase fw-bold tracking-wider" style="font-size: 0.75rem;">Omset Tunai Hari Ini</small>
+                <h3 class="fw-bold mb-0 mt-1">Rp 4.250k</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="panel mt-4">
-          <div class="panel-header"><h2 class="h5 mb-0 section-title"><span>Status Sistem</span></h2></div>
-          <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
+          <div class="panel-header mb-2"><h2 class="h5 mb-0 section-title"><span>Status Operasional Sistem</span></h2></div>
+          <p class="text-muted mb-0 small">Seluruh modul inti SIMRS v3.0 terhubung sukses dengan Google Apps Script Cloud Engine. Gunakan bar menu navigasi di sebelah kiri untuk memproses data operasional poliklinik secara realtime.</p>
         </div>`;
       break;
 
@@ -266,9 +315,7 @@ async function executeLogin(e) {
         avatar: resData.data.role === 'Dokter' ? 'avatar-2.jpg' : 'avatar.jpg'
       };
       
-      // Mengamankan data sesi login ke localStorage browser
       localStorage.setItem('simrs_user_session', JSON.stringify(AppState.user));
-      
       navigateTo('dashboard');
     } else {
       errorBox.innerText = resData.message || "Kredensial salah.";
@@ -286,15 +333,38 @@ async function executeLogin(e) {
 
 function executeLogout() {
   AppState.user = null;
-  // Menghapus rekaman sesi login di localStorage saat staf logout
   localStorage.removeItem('simrs_user_session');
   navigateTo('login');
 }
 
-// Handler pengecekan status login aktif saat halaman di-reload / F5
+// HANDLER GLOBAL CLICKS & INITIALIZATION
 window.addEventListener('DOMContentLoaded', () => {
+  // Logic Hamburger Sidebar Toggle murni dari app.js
+  document.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('.sidebar-toggle');
+    const backdrop = e.target.closest('[data-sidebar-close]');
+    const shell = document.getElementById('main-layout');
+    
+    if (toggleBtn || backdrop) {
+      if (shell) {
+        shell.classList.toggle('sidebar-open');
+      }
+    }
+
+    // Logic Dark Mode Simpel
+    const themeBtn = e.target.closest('[data-theme-toggle]');
+    if (themeBtn) {
+      document.body.classList.toggle('dark-theme');
+      const icon = themeBtn.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('bi-moon-stars');
+        icon.classList.toggle('bi-sun');
+      }
+    }
+  });
+
+  // Load Session
   const savedSession = localStorage.getItem('simrs_user_session');
-  
   if (savedSession) {
     try {
       AppState.user = JSON.parse(savedSession);
