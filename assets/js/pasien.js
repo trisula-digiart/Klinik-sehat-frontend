@@ -1,148 +1,153 @@
 /**
  * pasien.js
- * Modul Frontend untuk Manajemen Pendaftaran Pasien Baru & Check-in Antrean Poliklinik
+ * Modul Frontend untuk Pendaftaran Pasien Baru & Check-in Antrean - adminHMD Pure Bootstrap 5 Version
  */
 
 const PasienModule = {
   /**
-   * Merender layout HTML untuk halaman Pendaftaran & Antrean
+   * Merender layout HTML untuk halaman Pendaftaran & Antrean menggunakan komponen asli adminHMD
    * @return {String}
    */
   render: function() {
     return `
-      <div class="space-y-8 animate-fadeIn">
-        <!-- Header Halaman -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 border-b border-slate-200 pb-5">
-          <div>
-            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Pendaftaran Pasien & Antrean</h2>
-            <p class="text-sm text-slate-500 mt-1">Registrasi pasien baru atau masukkan pasien terdaftar ke dalam antrean layanan poliklinik.</p>
-          </div>
-        </div>
+      <div class="animate-fadeIn">
+        <!-- Alert Notification Box Bawaan Bootstrap -->
+        <div id="pasien-alert" class="hidden alert alert-dismissible fade show p-3 rounded-3 mb-4" role="alert"></div>
 
-        <!-- Alert Notification Box -->
-        <div id="pasien-alert" class="hidden p-4 rounded-xl text-sm font-medium border transition-all duration-300"></div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="row g-4">
           
-          <!-- Kiri: Form Registrasi Pasien Baru (2 Kolom Wide jika single, tapi kita bagi 1:2 dengan pencarian) -->
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-1">
-            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center space-x-2">
-              <span>📝</span> <span>Pasien Baru</span>
-            </h3>
-            <form id="form-registrasi-pasien" onsubmit="PasienModule.handleRegistrasi(event)" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">NIK (Nomor Induk Kependudukan)</label>
-                <input type="text" id="reg-nik" required maxlength="16" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <!-- Kiri: Form Registrasi Pasien Baru -->
+          <div class="col-12 col-lg-5">
+            <div class="panel h-100">
+              <div class="panel-header border-b pb-3 mb-4">
+                <h3 class="h5 section-title mb-0">
+                  <i class="bi bi-pencil-square me-2"></i>Pasien Baru
+                </h3>
               </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nama Lengkap Pasien</label>
-                <input type="text" id="reg-nama" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tgl Lahir</label>
-                  <input type="date" id="reg-tgl-lahir" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              
+              <form id="form-registrasi-pasien" onsubmit="PasienModule.handleRegistrasi(event)">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">NIK (Nomor Induk Kependudukan)</label>
+                  <input type="text" id="reg-nik" required maxlength="16" class="form-control">
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Gender</label>
-                  <select id="reg-jk" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Nama Lengkap Pasien</label>
+                  <input type="text" id="reg-nama" required class="form-control">
+                </div>
+                
+                <div class="row g-3 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Tgl Lahir</label>
+                    <input type="date" id="reg-tgl-lahir" required class="form-control">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Gender</label>
+                    <select id="reg-jk" required class="form-select">
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Jenis Penjamin</label>
+                  <select id="reg-penjamin" required class="form-select">
+                    <option value="Umum">Umum (Mandiri)</option>
+                    <option value="BPJS">BPJS Kesehatan</option>
                   </select>
                 </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Jenis Penjamin</label>
-                <select id="reg-penjamin" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="Umum">Umum (Mandiri)</option>
-                  <option value="BPJS">BPJS Kesehatan</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nomor HP</label>
-                <input type="tel" id="reg-hp" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Alamat Domisili</label>
-                <textarea id="reg-alamat" rows="2" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-              </div>
-              <button type="submit" id="btn-submit-pasien" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm py-2.5 rounded-lg shadow-sm transition duration-150">
-                Daftarkan Pasien Baru
-              </button>
-            </form>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Nomor HP</label>
+                  <input type="tel" id="reg-hp" required class="form-control">
+                </div>
+                
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Alamat Domisili</label>
+                  <textarea id="reg-alamat" rows="3" required class="form-control"></textarea>
+                </div>
+                
+                <button type="submit" id="btn-submit-pasien" class="btn btn-primary w-100 py-2.5">
+                  <i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru
+                </button>
+              </form>
+            </div>
           </div>
 
-          <!-- Kanan: Pencarian Pasien & Check-in Antrean Poli (2 Kolom Wide) -->
-          <div class="space-y-6 lg:col-span-2">
-            
-            <!-- Blok Cari Pasien -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-              <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center space-x-2">
-                <span>🔍</span> <span>Cari & Daftarkan ke Antrean Poliklinik</span>
-              </h3>
-              <div class="flex space-x-2 mb-6">
-                <input type="text" id="search-keyword" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <button onclick="PasienModule.cariPasien()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition duration-150">
+          <!-- Kanan: Pencarian Pasien & Check-in Antrean Poli -->
+          <div class="col-12 col-lg-7">
+            <div class="panel h-100">
+              <div class="panel-header border-b pb-3 mb-4">
+                <h3 class="h5 section-title mb-0">
+                  <i class="bi bi-search me-2"></i>Cari & Daftarkan ke Antrean Poliklinik
+                </h3>
+              </div>
+              
+              <div class="input-group mb-4">
+                <input type="text" id="search-keyword" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control py-2.5">
+                <button onclick="PasienModule.cariPasien()" class="btn btn-dark px-4" type="button">
                   Cari Pasien
                 </button>
               </div>
 
-              <!-- Hasil Pencarian -->
-              <div id="search-results-container" class="hidden border border-slate-100 rounded-xl overflow-hidden bg-slate-50 p-4 space-y-4">
-                <div class="border-b border-slate-200 pb-3">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Data Pasien Ditemukan:</h4>
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                    <div>
-                      <span class="block text-xs text-slate-400">No. RM</span>
-                      <span id="target-no-rm" class="text-sm font-bold text-slate-700">-</span>
+              <!-- Hasil Pencarian Wrapper -->
+              <div id="search-results-container" class="hidden border rounded-3 p-4 bg-body-secondary mb-3">
+                <div class="border-bottom pb-3 mb-4">
+                  <h4 class="small fw-bold text-uppercase tracking-wider text-muted mb-3">Data Pasien Ditemukan:</h4>
+                  <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">No. RM</span>
+                      <span id="target-no-rm" class="fw-bold text-body">-</span>
                     </div>
-                    <div>
-                      <span class="block text-xs text-slate-400">Nama Pasien</span>
-                      <span id="target-nama" class="text-sm font-medium text-slate-700">-</span>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">Nama Pasien</span>
+                      <span id="target-nama" class="fw-medium text-body">-</span>
                     </div>
-                    <div>
-                      <span class="block text-xs text-slate-400">NIK</span>
-                      <span id="target-nik" class="text-sm text-slate-700">-</span>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">NIK</span>
+                      <span id="target-nik" class="text-body">-</span>
                     </div>
-                    <div>
-                      <span class="block text-xs text-slate-400">Penjamin</span>
-                      <span id="target-penjamin" class="text-sm font-semibold px-2 py-0.5 rounded text-xs inline-block bg-slate-200 text-slate-800">-</span>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">Penjamin</span>
+                      <span id="target-penjamin" class="badge text-bg-secondary mt-1">-</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Form Tujuan Antrean -->
                 <div class="pt-2">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Tentukan Tujuan Poliklinik & Dokter:</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-600 mb-1">Poliklinik Tujuan</label>
-                      <select id="queue-poli" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <h4 class="small fw-bold text-uppercase tracking-wider text-muted mb-3">Tentukan Tujuan Poliklinik & Dokter:</h4>
+                  <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small text-muted">Poliklinik Tujuan</label>
+                      <select id="queue-poli" class="form-select">
                         <option value="POLI-UMUM">Poli Umum (Prefix A)</option>
                         <option value="POLI-GIGI">Poli Gigi (Prefix B)</option>
                         <option value="POLI-ANAK">Poli Anak (Prefix C)</option>
                       </select>
                     </div>
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-600 mb-1">Dokter Spesialis / Pemeriksa</label>
-                      <select id="queue-dokter" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small text-muted">Dokter Spesialis / Pemeriksa</label>
+                      <select id="queue-dokter" class="form-select">
                         <option value="DR-001">dr. Ahmad Faisal</option>
                         <option value="DR-002">drg. Citra Lestari</option>
                         <option value="DR-003">dr. Budi Santoso, Sp.A</option>
                       </select>
                     </div>
                   </div>
-                  <div class="mt-4 flex justify-end">
-                    <button onclick="PasienModule.checkInAntrean()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm transition duration-150">
-                      Masukkan ke Antrean Kerja
+                  <div class="d-flex justify-content-end">
+                    <button onclick="PasienModule.checkInAntrean()" class="btn btn-success px-4 py-2">
+                      <i class="bi bi-clipboard-plus me-2"></i>Masukkan ke Antrean Kerja
                     </button>
                   </div>
                 </div>
               </div>
               
               <!-- Placeholder jika data kosong -->
-              <div id="search-empty-placeholder" class="text-center py-8 text-slate-400 text-sm">
-                Silakan ketik kata kunci pencarian di atas untuk memproses antrean.
+              <div id="search-empty-placeholder" class="blank-state py-5 text-center my-auto mx-auto text-muted">
+                <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
+                <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>
               </div>
 
             </div>
@@ -163,11 +168,11 @@ const PasienModule = {
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('pasien-alert');
     alertBox.innerText = message;
-    alertBox.className = `p-4 rounded-xl text-sm font-medium border transition-all duration-300 block ${
-      isSuccess ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-600'
+    alertBox.className = `alert alert-dismissible fade show p-3 rounded-3 mb-4 d-block ${
+      isSuccess ? 'alert-success border-success-subtle text-success' : 'alert-danger border-danger-subtle text-danger'
     }`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => alertBox.classList.add('hidden'), 5000);
+    setTimeout(() => alertBox.className = 'hidden', 5000);
   },
 
   /**
@@ -177,7 +182,7 @@ const PasienModule = {
     e.preventDefault();
     const btnSubmit = document.getElementById('btn-submit-pasien');
     btnSubmit.disabled = true;
-    btnSubmit.innerText = "Memproses Pendaftaran...";
+    btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...`;
 
     const payload = {
       api_key: CONFIG.API_KEY,
@@ -205,7 +210,6 @@ const PasienModule = {
         this.showAlert(`Sukses! Pasien baru berhasil didaftarkan. Nomor RM: ${res.data.no_rm}`);
         document.getElementById('form-registrasi-pasien').reset();
         
-        // Otomatis masukkan ke kolom pencarian biar bisa langsung di-checkin poli
         document.getElementById('search-keyword').value = res.data.no_rm;
         this.cariPasien();
       } else {
@@ -215,11 +219,10 @@ const PasienModule = {
       this.showAlert("Error: Tidak dapat terhubung ke server backend.", false);
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.innerText = "Daftarkan Pasien Baru";
+      btnSubmit.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru`;
     }
   },
 
-  // Menyimpan data pasien terpilih sementara untuk kebutuhan check-in antrean
   selectedPasienRM: null,
 
   /**
@@ -236,7 +239,7 @@ const PasienModule = {
     }
 
     resultsContainer.classList.add('hidden');
-    emptyPlaceholder.innerText = "Sedang mencari data pasien...";
+    emptyPlaceholder.innerHTML = `<span class="spinner-border spinner-border-sm text-primary mb-2 d-block mx-auto" role="status"></span>Sedang mencari data pasien...`;
 
     try {
       const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=cariPasien&keyword=${encodeURIComponent(kw)}`;
@@ -244,7 +247,6 @@ const PasienModule = {
       const res = await response.json();
 
       if (res.success && res.data.length > 0) {
-        // Ambil data pertama hasil pencarian terdekat
         const pasien = res.data[0];
         
         this.selectedPasienRM = pasien.no_rm;
@@ -255,19 +257,21 @@ const PasienModule = {
         const penjaminBadge = document.getElementById('target-penjamin');
         penjaminBadge.innerText = pasien.jenis_penjamin;
         if (pasien.jenis_penjamin === 'BPJS') {
-          penjaminBadge.className = "text-sm font-semibold px-2 py-0.5 rounded text-xs inline-block bg-blue-100 text-blue-800";
+          penjaminBadge.className = "badge text-bg-primary mt-1";
         } else {
-          penjaminBadge.className = "text-sm font-semibold px-2 py-0.5 rounded text-xs inline-block bg-amber-100 text-amber-800";
+          penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
         }
 
         emptyPlaceholder.classList.add('hidden');
         resultsContainer.classList.remove('hidden');
       } else {
-        emptyPlaceholder.innerText = "Data pasien tidak ditemukan. Silakan daftarkan sebagai pasien baru di panel sebelah kiri.";
+        emptyPlaceholder.innerHTML = `
+          <i class="bi bi-exclamation-circle text-danger display-6 d-block mb-2"></i>
+          Data pasien tidak ditemukan. Silakan daftarkan sebagai pasien baru di panel sebelah kiri.`;
         this.selectedPasienRM = null;
       }
     } catch (err) {
-      emptyPlaceholder.innerText = "Gagal memproses pencarian pasien.";
+      emptyPlaceholder.innerHTML = `<i class="bi bi-x-circle text-danger display-6 d-block mb-2"></i>Gagal memproses pencarian pasien.`;
       this.showAlert("Error koneksi data saat mencari pasien.", false);
     }
   },
@@ -304,10 +308,11 @@ const PasienModule = {
 
       if (res.success) {
         this.showAlert(`Sukses! Nomor Antrean berhasil dicetak: ${res.data.no_antrian} (${poli})`);
-        // Reset tampilan pencarian antrean
         document.getElementById('search-results-container').classList.add('hidden');
         document.getElementById('search-empty-placeholder').classList.remove('hidden');
-        document.getElementById('search-empty-placeholder').innerText = "Silakan ketik kata kunci pencarian di atas untuk memproses antrean.";
+        document.getElementById('search-empty-placeholder').innerHTML = `
+          <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
+          <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>`;
         document.getElementById('search-keyword').value = "";
         this.selectedPasienRM = null;
       } else {
@@ -319,5 +324,4 @@ const PasienModule = {
   }
 };
 
-// Pasang objek ke lingkup window agar bisa dieksekusi oleh mesin router app.js secara dinamis
 window.PasienModule = PasienModule;
