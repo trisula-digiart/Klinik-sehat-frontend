@@ -99,5 +99,17 @@
   <script src="assets/js/dokter.js"></script>
   <script src="assets/js/apotek.js"></script>
   <script src="assets/js/kasir.js"></script>
+
+  <script>
+    // Global variable override untuk menjinakkan main.js bawaan template agar tidak memicu 404 avatar
+    window.adminHMDUser = {
+      name: "Admin Klinik",
+      workspace: "Klinik Sehat Operational",
+      avatar: "assets/js/images/avatar/avatar.jpg"
+    };
+  </script>
+  
+  <!-- JavaScript Engine Framework -->
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
