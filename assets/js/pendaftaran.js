@@ -129,8 +129,9 @@ window.PendaftaranModule = window.PendaftaranModule || {
                   <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
                     <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
                   </h3>
-                  <button onclick="PendaftaranModule.loadLiveMonitor()" class="btn btn-xs btn-outline-secondary py-0.5 px-2 text-xs" title="Refresh Tabel">
-                    <i class="bi bi-arrow-clockwise"></i> Sync
+                  <!-- Pastikan button ini tidak menggunakan class tersembunyi/salah ketik -->
+                  <button onclick="PendaftaranModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button" title="Refresh Tabel">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
                   </button>
                 </div>
                 <div class="table-responsive border rounded-3" style="max-height: 300px; overflow-y: auto;">
