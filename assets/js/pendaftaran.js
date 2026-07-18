@@ -3,7 +3,7 @@
  * Modul Frontend Pendaftaran Pasien Baru & Live Queue Monitor Harian
  */
 
-window.PendaftaranModule = window.PendaftaranModule || {
+window.PasienModule = window.PasienModule || {
   pasienAktif: null,
 
   render: function() {
@@ -24,7 +24,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
                 <h2 class="h5 mb-0 fw-bold text-dark">Pasien Baru</h2>
               </div>
               
-              <form id="form-pasien-baru" onsubmit="PendaftaranModule.handleDaftarPasien(event)">
+              <form id="form-pasien-baru" onsubmit="PasienModule.handleDaftarPasien(event)">
                 <div class="mb-3">
                   <label class="form-label small fw-bold text-uppercase text-muted">NIK (Nomor Induk Kependudukan)</label>
                   <input type="number" id="reg-nik" class="form-control" required placeholder="Masukkan 16 digit NIK">
@@ -83,7 +83,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
               <!-- Bar Pencarian Global -->
               <div class="input-group mb-4 shadow-sm rounded">
                 <input type="text" id="pendaftaran-search-key" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control form-control-lg">
-                <button onclick="PendaftaranModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
+                <button onclick="PasienModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
               </div>
 
               <!-- Area Eksplisit / Eksekusi Form Alokasi Poli -->
@@ -115,8 +115,8 @@ window.PendaftaranModule = window.PendaftaranModule || {
                     </select>
                   </div>
                   <div class="col-12 text-end mt-3">
-                    <button onclick="PendaftaranModule.batalEksekusi()" class="btn btn-sm btn-light border me-2 fw-medium px-3">Batal</button>
-                    <button onclick="PendaftaranModule.kirimKeAntreanKerja()" id="btn-submit-antrean" class="btn btn-sm btn-success fw-bold px-4 text-white shadow-sm">
+                    <button onclick="PasienModule.batalEksekusi()" class="btn btn-sm btn-light border me-2 fw-medium px-3">Batal</button>
+                    <button onclick="PasienModule.kirimKeAntreanKerja()" id="btn-submit-antrean" class="btn btn-sm btn-success fw-bold px-4 text-white shadow-sm">
                       <i class="bi bi-box-arrow-in-right me-1"></i> Masukkan ke Antrean Kerja
                     </button>
                   </div>
@@ -129,7 +129,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
                   <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
                     <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
                   </h3>
-                  <button onclick="PendaftaranModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button" title="Refresh Tabel">
+                  <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button" title="Refresh Tabel">
                     <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
                   </button>
                 </div>
@@ -188,7 +188,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
             <td class="py-2 fw-medium text-dark">${pasien.nama}</td>
             <td class="py-2"><span class="badge bg-light text-dark border px-2 py-0.5">${pasien.jenis_penjamin || 'Umum'}</span></td>
             <td class="py-2 text-center">
-              <button onclick='PendaftaranModule.pilihPasienDariTabel(${JSON.stringify(pasien)})' class="btn btn-xs btn-primary fw-bold py-0.5 px-2 shadow-xs">
+              <button onclick='PasienModule.pilihPasienDariTabel(${JSON.stringify(pasien)})' class="btn btn-xs btn-primary fw-bold py-0.5 px-2 shadow-xs">
                 <i class="bi bi-box-arrow-up me-1"></i> Proses Alokasi
               </button>
             </td>
