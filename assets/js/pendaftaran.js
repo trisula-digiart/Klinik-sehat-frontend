@@ -337,3 +337,8 @@ window.PasienModule = window.PasienModule || {
     }
   }
 };
+
+// FORCE ROUTER UPDATE: Jika view aktif saat ini adalah pendaftaran, paksa render ulang layout setelah file di-load
+if (window.AppState && window.AppState.currentView === 'pendaftaran' && typeof window.renderLayout === 'function') {
+  window.renderLayout();
+}
