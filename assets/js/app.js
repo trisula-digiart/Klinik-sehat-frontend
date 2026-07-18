@@ -59,9 +59,7 @@ function renderLayout() {
         </div>
         <div class="panel mt-4">
           <div class="panel-header"><h2 class="h5 mb-0 section-title"><span>Status Sistem</span></h2></div>
-          <div class="panel-body">
-            <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
-          </div>
+          <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
         </div>`;
       break;
 
@@ -131,11 +129,9 @@ function wrapModuleContent(title, iconClass, description, moduleObject) {
   } else {
     contentContainer.innerHTML = headerHtml + `
       <div class="panel mt-4">
-        <div class="panel-body">
-          <div class="blank-state py-5 text-center">
-            <h2 class="h5 mb-2">${title} Belum Dimuat</h2>
-            <p class="text-muted mb-0">File JavaScript pendukung modul ini sedang dalam tahap kustomisasi layout template baru.</p>
-          </div>
+        <div class="blank-state py-5 text-center">
+          <h2 class="h5 mb-2">${title} Belum Dimuat</h2>
+          <p class="text-muted mb-0">File JavaScript pendukung modul ini sedang dalam tahap kustomisasi layout template baru.</p>
         </div>
       </div>`;
   }
