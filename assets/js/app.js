@@ -127,7 +127,8 @@ function renderLayout() {
       break;
       
     case 'pemeriksaan':
-      wrapModuleContent("Pemeriksaan", "bi-activity", "Ruang periksa dokter, pencatatan diagnosa, dan terapi SOAP.", window.DokterModule);
+      // FIX SINKRONISASI: Diarahkan langsung ke modul baru yang valid (window.PemeriksaanModule)
+      wrapModuleContent("Pemeriksaan", "bi-activity", "Ruang periksa dokter, pencatatan diagnosa, dan terapi SOAP.", window.PemeriksaanModule);
       break;
 
     case 'apotek':
