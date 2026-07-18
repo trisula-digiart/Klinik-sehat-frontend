@@ -115,7 +115,7 @@ function renderLayout() {
       break;
 
     case 'pendaftaran':
-      // FIX SINKRONISASI OBJEK MODUL: Diarahkan ke objek window.PendaftaranModule yang benar sesuai pendaftaran.js
+      // Memastikan modul mengarah ke window.PendaftaranModule yang dideklarasikan di pendaftaran.js
       wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PendaftaranModule);
       break;
 
@@ -338,7 +338,6 @@ function executeLogout() {
   navigateTo('login');
 }
 
-// HANDLER GLOBAL CLICKS & INITIALIZATION
 window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const toggleBtn = e.target.closest('.sidebar-toggle');
