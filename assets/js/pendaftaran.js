@@ -86,7 +86,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
                 <button onclick="PendaftaranModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
               </div>
 
-              <!-- Area Eksplisit / Eksekusi Form Alokasi Poli (Default Tersembunyi, Muncul saat Proses/Cari) -->
+              <!-- Area Eksplisit / Eksekusi Form Alokasi Poli -->
               <div id="antrean-execution-card" class="d-none border border-primary-subtle rounded-3 p-4 bg-light mb-4 shadow-sm">
                 <div class="row g-2 small border-bottom pb-3 mb-3 text-dark">
                   <div class="col-6 col-sm-3">No. RM: <strong class="text-primary d-block font-monospace" id="exc-rm">-</strong></div>
@@ -123,13 +123,12 @@ window.PendaftaranModule = window.PendaftaranModule || {
                 </div>
               </div>
 
-              <!-- REAL-TIME MONITORING PASIEN PER HARI INI (DI BAWAH FORM SESUAI PANAH) -->
+              <!-- REAL-TIME MONITORING PASIEN PER HARI INI -->
               <div class="mt-4 pt-2 border-top">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
                     <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
                   </h3>
-                  <!-- Pastikan button ini tidak menggunakan class tersembunyi/salah ketik -->
                   <button onclick="PendaftaranModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button" title="Refresh Tabel">
                     <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
                   </button>
@@ -173,9 +172,6 @@ window.PendaftaranModule = window.PendaftaranModule || {
     setTimeout(() => alertBox.classList.add('d-none'), 5000);
   },
 
-  /**
-   * Mengambil data master pasien yang terdaftar khusus pada hari ini dari database
-   */
   loadLiveMonitor: async function() {
     const tbody = document.getElementById('pendaftaran-live-monitor-tbody');
     if (!tbody) return;
@@ -212,9 +208,6 @@ window.PendaftaranModule = window.PendaftaranModule || {
     }
   },
 
-  /**
-   * Submit Pasien Baru di Form Kiri
-   */
   handleDaftarPasien: async function(event) {
     event.preventDefault();
     const btn = document.getElementById('btn-submit-pasien');
@@ -246,7 +239,6 @@ window.PendaftaranModule = window.PendaftaranModule || {
         this.showAlert(`Sukses mendaftarkan pasien! RM Baru: ${res.data.no_rm}`);
         document.getElementById('form-pasien-baru').reset();
 
-        // FAST-TRACK UX: Langsung naikkan datanya ke form alokasi atas agar siap klik kirim
         const pasienBaru = {
           no_rm: res.data.no_rm,
           nik: payload.nik,
@@ -263,13 +255,10 @@ window.PendaftaranModule = window.PendaftaranModule || {
     } finally {
       btn.disabled = false;
       btn.innerHTML = `<i class="bi bi-person-check me-2"></i>Daftarkan Pasien Baru`;
-      this.loadLiveMonitor(); // Refresh tabel bawah
+      this.loadLiveMonitor();
     }
   },
 
-  /**
-   * Menampilkan form alokasi poliklinik di bagian atas panel kanan
-   */
   pilihPasienDariTabel: function(pasien) {
     this.pasienAktif = pasien;
     
@@ -311,9 +300,6 @@ window.PendaftaranModule = window.PendaftaranModule || {
     document.getElementById('antrean-execution-card').classList.add('d-none');
   },
 
-  /**
-   * Menembak data ke antrean kerja poliklinik
-   */
   kirimKeAntreanKerja: async function() {
     if (!this.pasienAktif) return;
 
@@ -347,7 +333,7 @@ window.PendaftaranModule = window.PendaftaranModule || {
     } catch (e) {
       this.showAlert("Error: Sambungan internet server terputus.", false);
     } finally {
-      this.loadLiveMonitor(); // Segarkan data tabel monitor bawah harian
+      this.loadLiveMonitor();
     }
   }
 };
