@@ -1,11 +1,12 @@
 /**
  * apotek.js
- * Modul Frontend untuk Dashboard Farmasi, Verifikasi Resep, & Eksekusi Potong Stok Farmasi - adminHMD Pure Bootstrap 5 Version
+ * Modul Frontend untuk Dashboard Farmasi, Verifikasi Resep, Master Data Obat, & Eksekusi Potong Stok Farmasi - adminHMD Pure Bootstrap 5 Version
  */
 
 const ApotekModule = {
-  // State internal untuk menyimpan antrean resep aktif dari server
+  // State internal untuk menyimpan antrean resep aktif dan master obat dari server
   listResepMasuk: [],
+  listMasterObat: [],
   selectedAntrianId: null,
 
   /**
@@ -30,18 +31,23 @@ const ApotekModule = {
             <span class="small fw-medium text-muted">
               <i class="bi bi-prescription2 text-primary me-2"></i>Manajemen Penyerahan Obat & e-Resep Apotek
             </span>
-            <button onclick="ApotekModule.muatAntreanResep()" class="btn btn-dark btn-sm px-3 py-2">
-              <i class="bi bi-arrow-clockwise me-1"></i>Perbarui Resep Masuk
-            </button>
+            <div class="d-flex gap-2">
+              <button onclick="ApotekModule.muatDataMasterObat()" class="btn btn-outline-primary btn-sm px-3">
+                <i class="bi bi-box-seam me-1"></i>Sinkronisasi Master Obat
+              </button>
+              <button onclick="ApotekModule.muatAntreanResep()" class="btn btn-dark btn-sm px-3 py-2">
+                <i class="bi bi-arrow-clockwise me-1"></i>Perbarui Resep Masuk
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Workspace Konten: Split Screen Row -->
-        <div class="row g-4 align-items-start">
+        <div class="row g-4 align-items-start mb-4">
           
           <!-- PANEL KIRI: Daftar E-Resep Masuk dari Ruang Dokter -->
           <div class="col-12 col-lg-5">
-            <div class="panel" style="height: 650px; display: flex; flex-direction: column;">
+            <div class="panel" style="height: 480px; display: flex; flex-direction: column;">
               <div class="panel-header border-b pb-3 mb-3">
                 <h3 class="h6 section-title mb-0">
                   <i class="bi bi-download me-2"></i>Antrean Masuk Resep
@@ -58,7 +64,7 @@ const ApotekModule = {
 
           <!-- PANEL KANAN: Lembar Kerja Detail Verifikasi & Penyerahan -->
           <div class="col-12 col-lg-7">
-            <div class="panel" style="height: 650px; display: flex; flex-direction: column;">
+            <div class="panel" style="height: 480px; display: flex; flex-direction: column;">
               <div class="panel-header border-b pb-3 mb-3">
                 <h3 class="h6 section-title mb-0">
                   <i class="bi bi-file-earmark-medical me-2"></i>Detail Lembar Kerja Farmasi
@@ -73,7 +79,44 @@ const ApotekModule = {
               </div>
             </div>
           </div>
+        </div>
 
+        <!-- PANEL BAWAH: DATA MASTER INVENTORI OBAT CLINIC REALTIME -->
+        <div class="row">
+          <div class="col-12">
+            <div class="panel">
+              <div class="panel-header border-b pb-3 mb-3 d-flex justify-content-between align-items-center">
+                <h3 class="h6 section-title mb-0">
+                  <i class="bi bi-grid-3x3-gap-fill me-2 text-success"></i>Master Inventori Obat Gudang (tb_obat)
+                </h3>
+                <span class="badge bg-success-subtle text-success" id="total-jenis-obat">0 Items</span>
+              </div>
+              <div class="table-responsive small custom-scrollbar" style="max-height: 350px; overflow-y: auto;">
+                <table class="table table-sm table-hover table-striped align-middle border text-center mb-0">
+                  <thead class="bg-light sticky-top" style="z-index: 10;">
+                    <tr class="text-muted tracking-wider small">
+                      <th class="p-2">Kode Obat</th>
+                      <th class="p-2 text-start">Nama Obat</th>
+                      <th class="p-2">Jenis</th>
+                      <th class="p-2">Satuan</th>
+                      <th class="p-2">Harga Beli</th>
+                      <th class="p-2">Harga Jual</th>
+                      <th class="p-2">Stok Aktual</th>
+                      <th class="p-2">Stok Min</th>
+                      <th class="p-2">Expired Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="master-obat-table-body">
+                    <tr>
+                      <td colspan="9" class="text-center py-4 text-muted">
+                        <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Memuat data inventori obat dari Google Sheet...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -84,17 +127,71 @@ const ApotekModule = {
    */
   init: function() {
     this.listResepMasuk = [];
+    this.listMasterObat = [];
     this.selectedAntrianId = null;
     this.muatAntreanResep();
+    this.muatDataMasterObat();
   },
 
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('apotek-alert');
+    if (!alertBox) return;
     alertBox.innerText = message;
     alertBox.className = `alert alert-dismissible fade show p-3 rounded-3 mb-4 d-block ${
       isSuccess ? 'alert-success border-success-subtle text-success' : 'alert-danger border-danger-subtle text-danger'
     }`;
-    setTimeout(() => alertBox.className = 'hidden', 5000);
+    setTimeout(() => { if(alertBox) alertBox.className = 'hidden'; }, 5000);
+  },
+
+  /**
+   * Mengambil data master seluruh obat langsung dari table sheet (tb_obat) backend GAS
+   */
+  muatDataMasterObat: async function() {
+    const tbody = document.getElementById('master-obat-table-body');
+    const totalBadge = document.getElementById('total-jenis-obat');
+    if (!tbody) return;
+
+    try {
+      // Menembak endpoint GAS API untuk aksi getObat / getMasterObat
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getObat`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+      const res = await response.json();
+
+      if (res.success && res.data && res.data.length > 0) {
+        this.listMasterObat = res.data;
+        if(totalBadge) totalBadge.innerText = `${res.data.length} Jenis Obat`;
+        tbody.innerHTML = '';
+
+        this.listMasterObat.forEach(obat => {
+          // Format mata uang rupiah ringkas
+          const hargaBeli = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(obat.harga_beli || 0);
+          const hargaJual = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(obat.harga_jual || 0);
+          
+          // Deteksi warning jika stok aktual di bawah atau sama dengan stok minimum
+          const isStokKritis = Number(obat.stok_aktual) <= Number(obat.stok_minimal);
+          const trStyle = isStokKritis ? 'table-danger fw-medium' : '';
+          const stokBadge = isStokKritis ? `<span class="badge bg-danger text-white"><i class="bi bi-exclamation-triangle-fill me-1"></i>${obat.stok_aktual}</span>` : obat.stok_aktual;
+
+          tbody.innerHTML += `
+            <tr class="${trStyle}">
+              <td class="font-mono fw-bold text-secondary">${obat.id_obat}</td>
+              <td class="text-start fw-semibold">${obat.nama_obat}</td>
+              <td><span class="badge bg-light text-dark border">${obat.jenis}</span></td>
+              <td>${obat.satuan}</td>
+              <td class="text-end">${hargaBeli}</td>
+              <td class="text-end text-primary fw-bold">${hargaJual}</td>
+              <td>${stokBadge}</td>
+              <td class="text-muted">${obat.stok_minimal}</td>
+              <td class="font-mono text-center small">${obat.expired_date ? obat.expired_date.split('T')[0] : '-'}</td>
+            </tr>
+          `;
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Data tabel 'tb_obat' di Google Sheet kosong atau aksi api 'getObat' belum terdaftar.</td></tr>`;
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger"><i class="bi bi-exclamation-octagon-fill me-1"></i>Gagal menyinkronkan data master gudang obat dari server.</td></tr>`;
+    }
   },
 
   /**
@@ -102,6 +199,7 @@ const ApotekModule = {
    */
   muatAntreanResep: async function() {
     const container = document.getElementById('list-resep-container');
+    if (!container) return;
     container.innerHTML = `
       <div class="text-center py-4 text-muted">
         <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Memanggil data resep...
@@ -238,6 +336,7 @@ const ApotekModule = {
 
   refreshLeftPanelHighlight: function() {
     const container = document.getElementById('list-resep-container');
+    if (!container) return;
     const items = container.children;
     
     this.listResepMasuk.forEach((item, idx) => {
@@ -258,8 +357,10 @@ const ApotekModule = {
    */
   konfirmasiPenyerahan: async function(idAntrian) {
     const btn = document.getElementById('btn-serah-obat');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span>Mengamankan Transaksi Stok Gudang...`;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span>Mengamankan Transaksi Stok Gudang...`;
+    }
 
     try {
       const response = await fetch(CONFIG.BASE_URL, {
@@ -280,15 +381,20 @@ const ApotekModule = {
         this.selectedAntrianId = null;
         this.handleStockAlerts(res.alerts || []);
         this.muatAntreanResep();
+        this.muatDataMasterObat(); // Auto-refresh data master obat setelah transaksi terpotong
       } else {
         this.showAlert(res.message || "Gagal memproses penyerahan obat.", false);
-        btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-capsule-pill me-2"></i>Konfirmasi Peracikan & Serahkan Obat Ke Pasien`;
+        if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="bi bi-capsule-pill me-2"></i>Konfirmasi Peracikan & Serahkan Obat Ke Pasien`;
+        }
       }
     } catch (err) {
       this.showAlert("Error: Sambungan internet terputus dari API server.", false);
-      btn.disabled = false;
-      btn.innerHTML = `<i class="bi bi-capsule-pill me-2"></i>Konfirmasi Peracikan & Serahkan Obat Ke Pasien`;
+      if(btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-capsule-pill me-2"></i>Konfirmasi Peracikan & Serahkan Obat Ke Pasien`;
+      }
     }
   },
 
@@ -298,6 +404,7 @@ const ApotekModule = {
   handleStockAlerts: function(alertsArray) {
     const box = document.getElementById('apotek-stock-critical-box');
     const ul = document.getElementById('list-stock-alerts');
+    if (!box || !ul) return;
     
     if (alertsArray && alertsArray.length > 0) {
       ul.innerHTML = '';
