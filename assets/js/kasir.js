@@ -216,7 +216,7 @@ const KasirModule = {
 
     try {
       // Menggunakan API listAntrianHariIni yang sudah ada di Main.gs
-      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=listAntrianHariIni`;
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=getAntreanKasir`;
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
