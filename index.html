@@ -6,13 +6,18 @@
   <meta name="description" content="Sistem Informasi Manajemen Klinik Sehat">
   <title>Klinik Sehat | Dashboard</title>
 
-  <!-- JALUR PATH KOREKSI: Tanpa ../ karena index.html sudah sejajar dengan folder assets -->
-  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- PENYESUAIAN PATH: Menyesuaikan langsung dengan folder utama lo 'assets/js' -->
+  <link rel="stylesheet" href="assets/js/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/js/css/style.css">
+  
+  <!-- Fallback Jaminan: Menggunakan CDN Icon agar simbol menu langsung tampil -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <style>
     .hidden { display: none !important; }
+    /* Memperbaiki tinggi minimal area halaman login bawaan template */
+    .auth-body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    /* Menjaga navigasi menu sidebar agar scrollable secara independen */
     .sidebar-nav { flex: 1; overflow-y: auto; }
     .sidebar-nav::-webkit-scrollbar { width: 4px; }
     .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -57,7 +62,7 @@
             
             <div class="dropdown">
               <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="avatar-img avatar-sm" id="topbar-avatar" src="assets/images/avatar/avatar.jpg" alt="Staf">
+                <img class="avatar-img avatar-sm" id="topbar-avatar" src="assets/js/images/avatar/avatar.jpg" alt="Staf">
                 <span class="profile-name d-none d-sm-inline" id="topbar-username">Staf Klinik</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
@@ -84,7 +89,7 @@
     </div>
   </div>
 
-  <!-- JavaScript Engine Framework -->
+  <!-- JavaScript Engine Framework - Diarahkan langsung ke dalam folder assets/js/ -->
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
