@@ -69,9 +69,9 @@ window.PasienModule = window.PasienModule || {
           </div>
         </div>
 
-        <!-- PANEL KANAN: Cari & Monitor Alokasi Poliklinik Kerja -->
+        <!-- PANEL KANAN: Cari & Antrean Poliklinik -->
         <div class="col-12 col-lg-7 mb-4">
-          <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+          <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <div class="p-2 bg-primary-subtle text-primary rounded-3 me-3">
@@ -82,11 +82,11 @@ window.PasienModule = window.PasienModule || {
 
               <!-- Bar Pencarian Global -->
               <div class="input-group mb-4 shadow-sm rounded">
-                <input type="text" id="pendaftaran-search-key" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control form-control-lg">
+                <input type="text" id="pendaftaran-search-key" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control">
                 <button onclick="PasienModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
               </div>
 
-              <!-- Area Eksplisit / Eksekusi Form Alokasi Poli -->
+              <!-- Area Eksplisit Form Alokasi Poli -->
               <div id="antrean-execution-card" class="d-none border border-primary-subtle rounded-3 p-4 bg-light mb-4 shadow-sm">
                 <div class="row g-2 small border-bottom pb-3 mb-3 text-dark">
                   <div class="col-6 col-sm-3">No. RM: <strong class="text-primary d-block font-monospace" id="exc-rm">-</strong></div>
@@ -110,7 +110,7 @@ window.PasienModule = window.PasienModule || {
                     <label class="form-label small fw-bold text-muted">Dokter Pemeriksa</label>
                     <select id="antrean-dokter" class="form-select form-select-sm">
                       <option value="dr. Ahmad Faisal">dr. Ahmad Faisal</option>
-                      <option value="drg. Citra Lestari">drg. Citra Lestari</option>
+                      <option value="drg. Citra Lestari">drg. Citri Lestari</option>
                       <option value="dr. Eka Wijaya">dr. Eka Wijaya</option>
                     </select>
                   </div>
@@ -123,35 +123,45 @@ window.PasienModule = window.PasienModule || {
                 </div>
               </div>
 
-              <!-- REAL-TIME MONITORING PASIEN PER HARI INI -->
-              <div class="mt-4 pt-2 border-top">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
-                    <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
-                  </h3>
-                  <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button" title="Refresh Tabel">
-                    <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
-                  </button>
-                </div>
-                <div class="table-responsive border rounded-3" style="max-height: 300px; overflow-y: auto;">
-                  <table class="table table-hover align-middle mb-0 small text-nowrap">
-                    <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
-                      <tr>
-                        <th class="py-2.5 px-3">No. RM</th>
-                        <th class="py-2.5">Nama Pasien</th>
-                        <th class="py-2.5">Penjamin</th>
-                        <th class="py-2.5 text-center">Tindakan</th>
-                      </tr>
-                    </thead>
-                    <tbody id="pendaftaran-live-monitor-tbody">
-                      <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <!-- Placeholder State saat Pencarian Kosong -->
+              <div id="antrean-empty-state" class="text-center py-5 text-muted border rounded-3 border-dashed">
+                <i class="bi bi-card-checklist display-6 d-block mb-3 text-secondary" style="opacity: 0.5;"></i>
+                <p class="mb-0 small px-4">Silakan ketik kata kunci pencarian di atas atau daftarkan pasien baru untuk memproses antrean.</p>
               </div>
 
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL BAWAH: Real-time Monitoring Pasien Hari Ini (Ditempatkan terpisah agar aman) -->
+        <div class="col-12 mt-4">
+          <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                  <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
+                </h3>
+                <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
+                </button>
+              </div>
+              <div class="table-responsive border rounded-3" style="max-height: 350px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 small text-nowrap">
+                  <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
+                    <tr>
+                      <th class="py-2.5 px-3">No. RM</th>
+                      <th class="py-2.5">Nama Pasien</th>
+                      <th class="py-2.5">Penjamin</th>
+                      <th class="py-2.5 text-center">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendaftaran-live-monitor-tbody">
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -269,7 +279,10 @@ window.PasienModule = window.PasienModule || {
     document.getElementById('exc-penjamin').innerText = pasien.jenis_penjamin || 'Umum';
     
     const exCard = document.getElementById('antrean-execution-card');
-    exCard.classList.remove('d-none');
+    const emState = document.getElementById('antrean-empty-state');
+    if (exCard) exCard.classList.remove('d-none');
+    if (emState) emState.classList.add('d-none');
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
@@ -297,7 +310,10 @@ window.PasienModule = window.PasienModule || {
   batalEksekusi: function() {
     this.pasienAktif = null;
     document.getElementById('pendaftaran-search-key').value = '';
-    document.getElementById('antrean-execution-card').classList.add('d-none');
+    const exCard = document.getElementById('antrean-execution-card');
+    const emState = document.getElementById('antrean-empty-state');
+    if (exCard) exCard.classList.add('d-none');
+    if (emState) emState.classList.remove('d-none');
   },
 
   kirimKeAntreanKerja: async function() {
@@ -337,8 +353,3 @@ window.PasienModule = window.PasienModule || {
     }
   }
 };
-
-// FORCE ROUTER UPDATE: Jika view aktif saat ini adalah pendaftaran, paksa render ulang layout setelah file di-load
-if (window.AppState && window.AppState.currentView === 'pendaftaran' && typeof window.renderLayout === 'function') {
-  window.renderLayout();
-}
