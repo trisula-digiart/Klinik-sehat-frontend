@@ -1,221 +1,232 @@
 /**
  * app.js
- * Core Single Page Application (SPA) Engine, Client-side Router, & Session Management
+ * Core SPA Engine & View Router - Tailored for adminHMD Template Mechanics
  */
 
-// Global App State
 const AppState = {
-  user: null, // Menyimpan objek user { username, nama, role } jika sudah login
-  currentView: 'pendaftaran' // View default setelah login sukses
+  user: null, // Berisi { username, nama, role, avatar } setelah auth sukses
+  currentView: 'dashboard'
 };
 
-/**
- * Hub inti untuk mengelola perutean tampilan halaman (views) secara dinamis
- * @param {String} viewName Nama target halaman yang ingin ditampilkan
- */
 function navigateTo(viewName) {
-  // Guard 1: Proteksi Akses Jika Belum Login
   if (!AppState.user && viewName !== 'login') {
     viewName = 'login';
   }
-
-  // Guard 2: Jika sudah login tapi mencoba akses halaman login, alihkan ke default
   if (AppState.user && viewName === 'login') {
-    viewName = 'pendaftaran';
+    viewName = 'dashboard';
   }
 
   AppState.currentView = viewName;
   renderLayout();
 }
 
-/**
- * Mengatur visibilitas kontainer utama berdasarkan view aktif
- */
 function renderLayout() {
   const loginSection = document.getElementById('login-section');
   const mainLayout = document.getElementById('main-layout');
   const contentContainer = document.getElementById('main-content-stream');
 
-  // Sembunyikan semua layout utama dulu
   loginSection.classList.add('hidden');
   mainLayout.classList.add('hidden');
 
-  // Kondisi 1: Tampilan Login Screen
   if (AppState.currentView === 'login') {
     loginSection.classList.remove('hidden');
     renderLoginView();
     return;
   }
 
-  // Kondisi 2: Tampilan Aplikasi Utama (Setelah Login Sukses)
+  // Tampilkan Layout Utama & Update Informasi Topbar
   mainLayout.classList.remove('hidden');
+  document.getElementById('topbar-username').innerText = AppState.user.nama;
+  document.getElementById('topbar-avatar').src = `assets/images/avatar/${AppState.user.avatar}`;
+
   renderSidebarMenu(AppState.user.role);
-  
-  // Aktifkan visual menu terpilih pada sidebar
   updateSidebarActiveState(AppState.currentView);
 
-  // Router Switcher: Memuat placeholder layout spesifik modul aplikasi sesuai Gambar Target
+  // Router Kamar Konten Dinamis (Style Menggunakan Class .panel Template)
   switch (AppState.currentView) {
     case 'dashboard':
       contentContainer.innerHTML = `
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-2xl font-bold text-slate-800">Dashboard Utama</h2>
-          <p class="text-gray-600 mt-2">Selamat datang di Sistem Informasi Klinik Sehat. Silakan pilih menu di samping untuk memulai pelayanan.</p>
+        <div class="page-heading">
+          <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-speedometer2"></i></span>
+            <div>
+              <p class="eyebrow mb-1">Ringkasan Pelayanan</p>
+              <h1 class="h3 mb-1">Dashboard Utama</h1>
+              <p class="text-muted mb-0">Selamat datang kembali di Sistem Informasi Manajemen Klinik Sehat.</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel mt-3">
+          <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><span>Sistem Operasional Aktif</span></h2>
+          </div>
+          <p class="text-muted">Silakan pilih modul menu di sebelah kiri untuk memulai penginputan data medis atau registrasi pasien.</p>
         </div>`;
       break;
 
     case 'pendaftaran':
-      contentContainer.innerHTML = window.PasienModule ? window.PasienModule.render() : `<h2 class="text-xl font-bold">Modul Pendaftaran Pasien</h2><p class="text-gray-600 mt-2">Script pasien.js belum dimuat.</p>`;
+      contentContainer.innerHTML = window.PasienModule ? window.PasienModule.render() : getDefaultPlaceholder("Pendaftaran Pasien", "bi-person-plus", "Form registrasi pasien baru dan pencarian data rekam medis lama.");
       if (window.PasienModule && window.PasienModule.init) window.PasienModule.init();
       break;
 
     case 'antrian':
-      contentContainer.innerHTML = window.AntrianModule ? window.AntrianModule.render() : `<h2 class="text-xl font-bold">Modul Antrean Pasien</h2><p class="text-gray-600 mt-2">Script antrian.js belum dimuat.</p>`;
+      contentContainer.innerHTML = window.AntrianModule ? window.AntrianModule.render() : getDefaultPlaceholder("Antrian Pasien", "bi-list-check", "Manajemen antrean loket pendaftaran, poli dokter, dan kasir.");
       if (window.AntrianModule && window.AntrianModule.init) window.AntrianModule.init();
       break;
 
     case 'rekam_medis':
-      contentContainer.innerHTML = `<h2 class="text-xl font-bold">Modul Rekam Medis</h2><p class="text-gray-600 mt-2">Riwayat rekam medis pasien terintegrasi.</p>`;
+      contentContainer.innerHTML = getDefaultPlaceholder("Rekam Medis", "bi-folder2-open", "Arsip data rekam medis pasien terintegrasi.");
       break;
 
     case 'pemeriksaan':
-      contentContainer.innerHTML = window.DokterModule ? window.DokterModule.render() : `<h2 class="text-xl font-bold">Modul Pemeriksaan Dokter (SOAP)</h2><p class="text-gray-600 mt-2">Script dokter.js belum dimuat.</p>`;
+      contentContainer.innerHTML = window.DokterModule ? window.DokterModule.render() : getDefaultPlaceholder("Pemeriksaan SOAP Dokter", "bi-heart-pulse", "Input pemeriksaan klinis dokter berbasis format SOAP.");
       if (window.DokterModule && window.DokterModule.init) window.DokterModule.init();
       break;
 
     case 'apotek':
-      contentContainer.innerHTML = window.ApotekModule ? window.ApotekModule.render() : `<h2 class="text-xl font-bold">Modul Apotek / Obat</h2><p class="text-gray-600 mt-2">Script apotek.js belum dimuat.</p>`;
+      contentContainer.innerHTML = window.ApotekModule ? window.ApotekModule.render() : getDefaultPlaceholder("Apotek / Farmasi", "bi-capsule", "Pemrosesan resep dokter, manajemen stok obat, dan penyerahan obat ke pasien.");
       if (window.ApotekModule && window.ApotekModule.init) window.ApotekModule.init();
       break;
 
     case 'pembayaran':
-      contentContainer.innerHTML = window.KasirModule ? window.KasirModule.render() : `<h2 class="text-xl font-bold">Modul Pembayaran & Billing</h2><p class="text-gray-600 mt-2">Script kasir.js belum dimuat.</p>`;
+      contentContainer.innerHTML = window.KasirModule ? window.KasirModule.render() : getDefaultPlaceholder("Pembayaran & Kasir", "bi-cash-coin", "Manajemen transaksi kasir, cetak kwitansi, dan invoice pasien.");
       if (window.KasirModule && window.KasirModule.init) window.KasirModule.init();
       break;
 
     case 'laporan':
-      contentContainer.innerHTML = `<h2 class="text-xl font-bold">Modul Laporan Pendapatan & Kunjungan</h2><p class="text-gray-600 mt-2">Analisis data performa klinik.</p>`;
+      contentContainer.innerHTML = getDefaultPlaceholder("Laporan Klinik", "bi-bar-chart-line", "Statistik kunjungan pasien, omset keuangan, dan pelaporan internal.");
       break;
 
     case 'jadwal_dokter':
-      contentContainer.innerHTML = `<h2 class="text-xl font-bold">Modul Jadwal Dokter</h2><p class="text-gray-600 mt-2">Manajemen operasional jadwal dokter klinik.</p>`;
+      contentContainer.innerHTML = getDefaultPlaceholder("Jadwal Dokter", "bi-calendar-event", "Manajemen shift operasional praktek dokter klinik.");
       break;
 
     case 'pengguna':
-      contentContainer.innerHTML = `<h2 class="text-xl font-bold">Modul Manajemen Pengguna</h2><p class="text-gray-600 mt-2">Pengaturan akun staf, role, dan password.</p>`;
+      contentContainer.innerHTML = getDefaultPlaceholder("Manajemen Pengguna", "bi-people", "Manajemen hak akses, role akun, dan password staf klinik.");
       break;
 
     case 'pengaturan':
-      contentContainer.innerHTML = `<h2 class="text-xl font-bold">Modul Pengaturan Sistem</h2><p class="text-gray-600 mt-2">Konfirmasi parameter operasional klinik.</p>`;
+      contentContainer.innerHTML = getDefaultPlaceholder("Pengaturan Sistem", "bi-gear", "Konfigurasi parameter dasar dan integrasi sistem server.");
       break;
 
     default:
-      contentContainer.innerHTML = `<div class="p-6 text-red-500 font-bold">Error: View '${AppState.currentView}' tidak valid.</div>`;
+      contentContainer.innerHTML = `<div class="alert alert-danger">Error: View '${AppState.currentView}' tidak valid.</div>`;
   }
 }
 
-/**
- * Merender daftar menu navigasi sidebar lengkap sesuai Gambar Target
- * @param {String} role Peran pengguna (Admin/Dokter/Apoteker/Kasir)
- */
+function getDefaultPlaceholder(title, iconClass, description) {
+  return `
+    <div class="page-heading">
+      <div class="page-heading-copy">
+        <span class="page-icon"><i class="bi ${iconClass}"></i></span>
+        <div>
+          <p class="eyebrow mb-1">Modul Aplikasi</p>
+          <h1 class="h3 mb-1">${title}</h1>
+          <p class="text-muted mb-0">${description}</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel mt-3">
+      <div class="blank-state py-5">
+        <h2 class="h5 mb-2">${title} Selesai Disinkronkan</h2>
+        <p class="text-muted mb-0">Komponen UI layout berhasil dialihkan sepenuhnya ke dalam arsitektur template baru.</p>
+      </div>
+    </div>`;
+}
+
 function renderSidebarMenu(role) {
   const sidebarNav = document.getElementById('sidebar-navigation');
   
-  // 10 Item Menu Lengkap Sesuai Struktur Gambar 1 yang lo kirim
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '🏠', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
-    { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: '👤', roles: ['Admin'] },
-    { id: 'antrian', label: 'Antrian Pasien', icon: '📋', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
-    { id: 'rekam_medis', label: 'Rekam Medis', icon: '💼', roles: ['Admin', 'Dokter'] },
-    { id: 'pemeriksaan', label: 'Pemeriksaan', icon: '🩺', roles: ['Admin', 'Dokter'] },
-    { id: 'apotek', label: 'Apotek / Obat', icon: '💊', roles: ['Admin', 'Apoteker'] },
-    { id: 'pembayaran', label: 'Pembayaran', icon: '💳', roles: ['Admin', 'Kasir'] },
-    { id: 'laporan', label: 'Laporan', icon: '📊', roles: ['Admin'] },
-    { id: 'jadwal_dokter', label: 'Jadwal Dokter', icon: '📅', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
-    { id: 'pengguna', label: 'Pengguna', icon: '👥', roles: ['Admin'] },
-    { id: 'pengaturan', label: 'Pengaturan', icon: '⚙️', roles: ['Admin'] }
+    { id: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
+    { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: 'bi-person-plus', roles: ['Admin'] },
+    { id: 'antrian', label: 'Antrian Pasien', icon: 'bi-clipboard-check', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
+    { id: 'rekam_medis', label: 'Rekam Medis', icon: 'bi-journal-medical', roles: ['Admin', 'Dokter'] },
+    { id: 'pemeriksaan', label: 'Pemeriksaan', icon: 'bi-activity', roles: ['Admin', 'Dokter'] },
+    { id: 'apotek', label: 'Apotek / Obat', icon: 'bi-capsule', roles: ['Admin', 'Apoteker'] },
+    { id: 'pembayaran', label: 'Pembayaran', icon: 'bi-credit-card', roles: ['Admin', 'Kasir'] },
+    { id: 'laporan', label: 'Laporan', icon: 'bi-bar-chart-line', roles: ['Admin'] },
+    { id: 'jadwal_dokter', label: 'Jadwal Dokter', icon: 'bi-calendar3', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
+    { id: 'pengguna', label: 'Pengguna', icon: 'bi-people', roles: ['Admin'] },
+    { id: 'pengaturan', label: 'Pengaturan', icon: 'bi-gear', roles: ['Admin'] }
   ];
 
+  const userAvatar = AppState.user.avatar || 'avatar.jpg';
+
   let htmlMenu = `
-    <div class="mb-6">
-      <h1 class="text-white text-xl font-bold tracking-wide">Klinik Sehat</h1>
-      <p class="text-xs text-emerald-400 mt-1">Staf: ${AppState.user.nama} (${role})</p>
+    <div class="sidebar-header">
+      <a class="brand-mark" href="#" onclick="navigateTo('dashboard')">
+        <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
+        <span class="brand-copy">
+          <span class="brand-title">Klinik Sehat</span>
+          <span class="brand-subtitle">SIM SIMRS v3.0</span>
+        </span>
+      </a>
     </div>
-    <nav class="space-y-1 flex-1 overflow-y-auto pr-1">`;
+    <nav class="sidebar-nav custom-scrollbar" style="flex: 1; overflow-y: auto;">`;
 
   menuItems.forEach(item => {
-    // Memastikan Admin bisa melihat semua menu, role lain menyesuaikan rule array item.roles
     if (role === 'Admin' || item.roles.includes(role)) {
       htmlMenu += `
-        <button onclick="navigateTo('${item.id}')" id="menu-btn-${item.id}" class="w-full flex items-center space-x-3 text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-slate-700 hover:text-white transition duration-200 text-sm font-medium mb-1">
-          <span class="text-base">${item.icon}</span>
-          <span>${item.label}</span>
-        </button>
-      `;
+        <a class="nav-link" href="#" id="menu-btn-${item.id}" onclick="navigateTo('${item.id}')">
+          <span class="nav-icon"><i class="bi ${item.icon}" aria-hidden="true"></i></span>
+          <span class="nav-text">${item.label}</span>
+        </a>`;
     }
   });
 
   htmlMenu += `
     </nav>
-    <div class="mt-auto pt-4 border-t border-slate-700">
-      <button onclick="executeLogout()" class="w-full flex items-center space-x-3 text-left px-4 py-2 rounded-lg text-red-400 hover:bg-red-900/40 hover:text-red-300 transition duration-200 text-sm font-medium">
-        <span>🚪</span>
-        <span>Log Out</span>
-      </button>
+    <div class="sidebar-user">
+      <img class="avatar-img avatar-md sidebar-user-avatar" src="assets/images/avatar/${userAvatar}" alt="Profile">
+      <strong>${AppState.user.nama}</strong>
+      <small>${role} Area</small>
+    </div>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>
+      <span class="sidebar-footer-text">Klinik Terkoneksi</span>
     </div>`;
   
   sidebarNav.innerHTML = htmlMenu;
 }
 
 function updateSidebarActiveState(activeId) {
-  const buttons = document.querySelectorAll('[id^="menu-btn-"]');
-  buttons.forEach(btn => {
-    btn.classList.remove('bg-emerald-600', 'text-white', 'bg-blue-600');
-    btn.classList.add('text-gray-300');
-  });
+  const links = document.querySelectorAll('.sidebar-nav .nav-link');
+  links.forEach(link => link.classList.remove('active'));
   
-  const activeBtn = document.getElementById(`menu-btn-${activeId}`);
-  if (activeBtn) {
-    activeBtn.classList.remove('text-gray-300');
-    // Beri warna biru khusus untuk top dashboard agar senada dengan header gambar lo, sisanya warna emerald hijau
-    if (activeId === 'dashboard') {
-      activeBtn.classList.add('bg-blue-600', 'text-white');
-    } else {
-      activeBtn.classList.add('bg-emerald-600', 'text-white');
-    }
+  const activeLink = document.getElementById(`menu-btn-${activeId}`);
+  if (activeLink) {
+    activeLink.classList.add('active');
   }
 }
 
-/**
- * Menyuntikkan form login interaktif ke layar utama
- */
 function renderLoginView() {
   const loginSection = document.getElementById('login-section');
   loginSection.innerHTML = `
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Klinik Sehat</h2>
-        <p class="text-sm text-gray-500 mt-2">Sistem Informasi Manajemen Pelayanan Pasien</p>
-      </div>
-      <div id="login-error-box" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-xs font-medium rounded-lg border border-red-200"></div>
-      <form id="main-login-form" onsubmit="executeLogin(event)" class="space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-          <input type="text" id="login-username" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-          <input type="password" id="login-password" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-        </div>
-        <button type="submit" id="login-submit-btn" class="w-full bg-emerald-600 text-white font-medium text-sm py-3 rounded-lg hover:bg-emerald-700 active:scale-[0.98] transition duration-150 shadow-md shadow-emerald-600/10">Masuk Ke Sistem</button>
-      </form>
-    </div>
-  `;
+    <main class="auth-page">
+      <section class="auth-card">
+        <a class="auth-brand" href="#"><span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span><span><strong>Klinik Sehat</strong><small>Sistem Informasi Pelayanan Klinik</small></span></a>
+        <div class="auth-visual"><img src="assets/images/png/dasher-ai.png" alt="Visual"></div>
+        <form onsubmit="executeLogin(event)">
+          <div class="mb-4">
+            <h1 class="h3 mb-1">Masuk Sistem</h1>
+            <p class="text-muted mb-0">Silakan gunakan kredensial staf aktif Anda.</p>
+          </div>
+          <div id="login-error-box" class="hidden alert alert-danger p-2 small mb-3"></div>
+          <div class="mb-3">
+            <label class="form-label" for="login-username">Username</label>
+            <input class="form-control" id="login-username" type="text" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="login-password">Password</label>
+            <input class="form-control" id="login-password" type="password" required>
+          </div>
+          <button class="btn btn-primary w-100" type="submit" id="login-submit-btn">Masuk Ke Sistem</button>
+        </form>
+      </section>
+    </main>`;
 }
 
-/**
- * Interseptor Aksi submit Form Login untuk menembak API Backend GAS
- */
 async function executeLogin(e) {
   e.preventDefault();
   const userIn = document.getElementById('login-username').value;
@@ -245,33 +256,30 @@ async function executeLogin(e) {
     const resData = await response.json();
 
     if (resData.success) {
-      AppState.user = resData.data;
-      
-      // Auto routing awal diarahkan ke menu pendaftaran pasien
-      navigateTo('pendaftaran');
+      AppState.user = {
+        ...resData.data,
+        avatar: resData.data.role === 'Dokter' ? 'avatar-2.jpg' : 'avatar.jpg'
+      };
+      navigateTo('dashboard');
     } else {
-      errorBox.innerText = resData.message || "Username atau Password salah.";
+      errorBox.innerText = resData.message || "Kredensial salah.";
       errorBox.classList.remove('hidden');
       btnSubmit.disabled = false;
       btnSubmit.innerText = "Masuk Ke Sistem";
     }
   } catch (err) {
-    errorBox.innerText = "Koneksi ke server gagal. Pastikan URL API GAS benar.";
+    errorBox.innerText = "Gagal menghubungi server Apps Script.";
     errorBox.classList.remove('hidden');
     btnSubmit.disabled = false;
     btnSubmit.innerText = "Masuk Ke Sistem";
   }
 }
 
-/**
- * Membersihkan sesi staf dan mereset view kembali ke login screen
- */
 function executeLogout() {
   AppState.user = null;
   navigateTo('login');
 }
 
-// Inisialisasi Aplikasi Saat Window DOM Selesai Dimuat
 window.addEventListener('DOMContentLoaded', () => {
   navigateTo('login');
 });
