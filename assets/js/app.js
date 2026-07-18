@@ -115,7 +115,8 @@ function renderLayout() {
       break;
 
     case 'pendaftaran':
-      wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PasienModule);
+      // FIX SINKRONISASI OBJEK MODUL: Diarahkan ke objek window.PendaftaranModule yang benar sesuai pendaftaran.js
+      wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PendaftaranModule);
       break;
 
     case 'antrian':
@@ -127,7 +128,6 @@ function renderLayout() {
       break;
       
     case 'pemeriksaan':
-      // FIX SINKRONISASI: Diarahkan langsung ke modul baru yang valid (window.PemeriksaanModule)
       wrapModuleContent("Pemeriksaan", "bi-activity", "Ruang periksa dokter, pencatatan diagnosa, dan terapi SOAP.", window.PemeriksaanModule);
       break;
 
@@ -340,7 +340,6 @@ function executeLogout() {
 
 // HANDLER GLOBAL CLICKS & INITIALIZATION
 window.addEventListener('DOMContentLoaded', () => {
-  // Logic Hamburger Sidebar Toggle murni dari app.js
   document.addEventListener('click', (e) => {
     const toggleBtn = e.target.closest('.sidebar-toggle');
     const backdrop = e.target.closest('[data-sidebar-close]');
@@ -352,7 +351,6 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Logic Dark Mode Simpel
     const themeBtn = e.target.closest('[data-theme-toggle]');
     if (themeBtn) {
       document.body.classList.toggle('dark-theme');
@@ -364,7 +362,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Load Session
   const savedSession = localStorage.getItem('simrs_user_session');
   if (savedSession) {
     try {
