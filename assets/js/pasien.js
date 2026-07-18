@@ -1,269 +1,327 @@
 /**
- * app.js
- * Core SPA Router Engine - Optimized Layout Wrapper for adminHMD Structure
+ * pasien.js
+ * Modul Frontend untuk Pendaftaran Pasien Baru & Check-in Antrean - adminHMD Pure Bootstrap 5 Version
  */
 
-const AppState = {
-  user: null, 
-  currentView: 'dashboard'
-};
+const PasienModule = {
+  /**
+   * Merender layout HTML untuk halaman Pendaftaran & Antrean menggunakan komponen asli adminHMD
+   * @return {String}
+   */
+  render: function() {
+    return `
+      <div class="animate-fadeIn">
+        <!-- Alert Notification Box Bawaan Bootstrap -->
+        <div id="pasien-alert" class="hidden alert alert-dismissible fade show p-3 rounded-3 mb-4" role="alert"></div>
 
-function navigateTo(viewName) {
-  if (!AppState.user && viewName !== 'login') {
-    viewName = 'login';
-  }
-  if (AppState.user && viewName === 'login') {
-    viewName = 'dashboard';
-  }
-
-  AppState.currentView = viewName;
-  renderLayout();
-}
-
-function renderLayout() {
-  const loginSection = document.getElementById('login-section');
-  const mainLayout = document.getElementById('main-layout');
-  const contentContainer = document.getElementById('main-content-stream');
-
-  loginSection.classList.add('hidden');
-  mainLayout.classList.add('hidden');
-
-  if (AppState.currentView === 'login') {
-    loginSection.classList.remove('hidden');
-    renderLoginView();
-    return;
-  }
-
-  mainLayout.classList.remove('hidden');
-  
-  // Sinkronisasi data profil topbar aman dari crash 404
-  if (AppState.user) {
-    document.getElementById('topbar-username').innerText = AppState.user.nama;
-    document.getElementById('topbar-avatar').src = `assets/js/images/avatar/${AppState.user.avatar || 'avatar.jpg'}`;
-    renderSidebarMenu(AppState.user.role);
-  }
-  
-  updateSidebarActiveState(AppState.currentView);
-
-  // Router Canvas Stream Injection
-  switch (AppState.currentView) {
-    case 'dashboard':
-      contentContainer.innerHTML = `
-        <div class="page-heading">
-          <div class="page-heading-copy">
-            <span class="page-icon"><i class="bi bi-speedometer2"></i></span>
-            <div>
-              <p class="eyebrow mb-1">Klinik Manajemen</p>
-              <h1 class="h3 mb-1">Dashboard Pelayanan</h1>
-              <p class="text-muted mb-0">Selamat datang kembali di Aplikasi Layanan Klinik Sehat.</p>
+        <div class="row g-4">
+          
+          <!-- Kiri: Form Registrasi Pasien Baru -->
+          <div class="col-12 col-lg-5">
+            <div class="panel h-100">
+              <div class="panel-header border-b pb-3 mb-4">
+                <h3 class="h5 section-title mb-0">
+                  <i class="bi bi-pencil-square me-2"></i>Pasien Baru
+                </h3>
+              </div>
+              
+              <form id="form-registrasi-pasien" onsubmit="PasienModule.handleRegistrasi(event)">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">NIK (Nomor Induk Kependudukan)</label>
+                  <input type="text" id="reg-nik" required maxlength="16" class="form-control">
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Nama Lengkap Pasien</label>
+                  <input type="text" id="reg-nama" required class="form-control">
+                </div>
+                
+                <div class="row g-3 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Tgl Lahir</label>
+                    <input type="date" id="reg-tgl-lahir" required class="form-control">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Gender</label>
+                    <select id="reg-jk" required class="form-select">
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Jenis Penjamin</label>
+                  <select id="reg-penjamin" required class="form-select">
+                    <option value="Umum">Umum (Mandiri)</option>
+                    <option value="BPJS">BPJS Kesehatan</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Nomor HP</label>
+                  <input type="tel" id="reg-hp" required class="form-control">
+                </div>
+                
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-uppercase tracking-wider text-muted mb-1">Alamat Domisili</label>
+                  <textarea id="reg-alamat" rows="3" required class="form-control"></textarea>
+                </div>
+                
+                <button type="submit" id="btn-submit-pasien" class="btn btn-primary w-100 py-2.5">
+                  <i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru
+                </button>
+              </form>
             </div>
           </div>
-        </div>
-        <div class="panel mt-4">
-          <div class="panel-header"><h2 class="h5 mb-0 section-title"><span>Status Sistem</span></h2></div>
-          <div class="panel-body">
-            <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
+
+          <!-- Kanan: Pencarian Pasien & Check-in Antrean Poli -->
+          <div class="col-12 col-lg-7">
+            <div class="panel h-100">
+              <div class="panel-header border-b pb-3 mb-4">
+                <h3 class="h5 section-title mb-0">
+                  <i class="bi bi-search me-2"></i>Cari & Daftarkan ke Antrean Poliklinik
+                </h3>
+              </div>
+              
+              <div class="input-group mb-4">
+                <input type="text" id="search-keyword" placeholder="Masukkan NIK, Nama, atau Nomor RM Pasien..." class="form-control py-2.5">
+                <button onclick="PasienModule.cariPasien()" class="btn btn-dark px-4" type="button">
+                  Cari Pasien
+                </button>
+              </div>
+
+              <!-- Hasil Pencarian Wrapper -->
+              <div id="search-results-container" class="hidden border rounded-3 p-4 bg-body-secondary mb-3">
+                <div class="border-bottom pb-3 mb-4">
+                  <h4 class="small fw-bold text-uppercase tracking-wider text-muted mb-3">Data Pasien Ditemukan:</h4>
+                  <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">No. RM</span>
+                      <span id="target-no-rm" class="fw-bold text-body">-</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">Nama Pasien</span>
+                      <span id="target-nama" class="fw-medium text-body">-</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">NIK</span>
+                      <span id="target-nik" class="text-body">-</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <span class="d-block small text-muted">Penjamin</span>
+                      <span id="target-penjamin" class="badge text-bg-secondary mt-1">-</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Form Tujuan Antrean -->
+                <div class="pt-2">
+                  <h4 class="small fw-bold text-uppercase tracking-wider text-muted mb-3">Tentukan Tujuan Poliklinik & Dokter:</h4>
+                  <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small text-muted">Poliklinik Tujuan</label>
+                      <select id="queue-poli" class="form-select">
+                        <option value="POLI-UMUM">Poli Umum (Prefix A)</option>
+                        <option value="POLI-GIGI">Poli Gigi (Prefix B)</option>
+                        <option value="POLI-ANAK">Poli Anak (Prefix C)</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small text-muted">Dokter Spesialis / Pemeriksa</label>
+                      <select id="queue-dokter" class="form-select">
+                        <option value="DR-001">dr. Ahmad Faisal</option>
+                        <option value="DR-002">drg. Citra Lestari</option>
+                        <option value="DR-003">dr. Budi Santoso, Sp.A</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button onclick="PasienModule.checkInAntrean()" class="btn btn-success px-4 py-2">
+                      <i class="bi bi-clipboard-plus me-2"></i>Masukkan ke Antrean Kerja
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Placeholder jika data kosong -->
+              <div id="search-empty-placeholder" class="blank-state py-5 text-center my-auto mx-auto text-muted">
+                <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
+                <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>
+              </div>
+
+            </div>
           </div>
-        </div>`;
-      break;
 
-    case 'pendaftaran':
-      wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PasienModule);
-      break;
-
-    case 'antrian':
-      wrapModuleContent("Antrian Pasien", "bi-clipboard-check", "Monitoring antrean loket pendaftaran, poliklinik, dan kasir.", window.AntrianModule);
-      break;
-
-    case 'rekam_medis':
-      wrapModuleContent("Rekam Medis", "bi-journal-medical", "Berkas digital rekam medis pasien terintegrasi.", null);
-      break;
-
-    case 'pemeriksaan':
-      wrapModuleContent("Pemeriksaan", "bi-activity", "Ruang periksa dokter, pencatatan diagnosa, dan terapi SOAP.", window.DokterModule);
-      break;
-
-    case 'apotek':
-      wrapModuleContent("Apotek / Obat", "bi-capsule", "Pemrosesan e-resep, racikan obat, dan kartu stok depo farmasi.", window.ApotekModule);
-      break;
-
-    case 'pembayaran':
-      wrapModuleContent("Pembayaran", "bi-credit-card", "Kwitansi transaksi kasir, rincian biaya tindakan, dan cetak nota.", window.KasirModule);
-      break;
-
-    default:
-      contentContainer.innerHTML = `<div class="alert alert-danger">Error: View '${AppState.currentView}' tidak ditemukan.</div>`;
-  }
-}
-
-function wrapModuleContent(title, iconClass, description, moduleObject) {
-  const contentContainer = document.getElementById('main-content-stream');
-  
-  let headerHtml = `
-    <div class="page-heading">
-      <div class="page-heading-copy">
-        <span class="page-icon"><i class="bi ${iconClass}"></i></span>
-        <div>
-          <p class="eyebrow mb-1">Modul Aplikasi</p>
-          <h1 class="h3 mb-1">${title}</h1>
-          <p class="text-muted mb-0">${description}</p>
         </div>
       </div>
-    </div>`;
+    `;
+  },
 
-  if (moduleObject && typeof moduleObject.render === 'function') {
-    // Injeksi dengan pembungkus kontainer kelas utilitas adminHMD agar styling Bootstrap terkunci penuh
-    contentContainer.innerHTML = headerHtml + `<div class="container-fluid px-0 mt-4">${moduleObject.render()}</div>`;
-    if (typeof moduleObject.init === 'function') moduleObject.init();
-  } else {
-    contentContainer.innerHTML = headerHtml + `
-      <div class="panel mt-4">
-        <div class="panel-body">
-          <div class="blank-state py-5 text-center">
-            <h2 class="h5 mb-2">${title} Belum Dimuat</h2>
-            <p class="text-muted mb-0">File JavaScript pendukung modul ini sedang dalam tahap kustomisasi layout template baru.</p>
-          </div>
-        </div>
-      </div>`;
-  }
-}
+  /**
+   * Inisialisasi Event Listener pasca DOM komponen di-render
+   */
+  init: function() {
+    // Sesi setup awal jika diperlukan
+  },
 
-function renderSidebarMenu(role) {
-  const sidebarNav = document.getElementById('sidebar-navigation');
-  
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
-    { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: 'bi-person-plus', roles: ['Admin'] },
-    { id: 'antrian', label: 'Antrian Pasien', icon: 'bi-clipboard-check', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
-    { id: 'rekam_medis', label: 'Rekam Medis', icon: 'bi-journal-medical', roles: ['Admin', 'Dokter'] },
-    { id: 'pemeriksaan', label: 'Pemeriksaan', icon: 'bi-activity', roles: ['Admin', 'Dokter'] },
-    { id: 'apotek', label: 'Apotek / Obat', icon: 'bi-capsule', roles: ['Admin', 'Apoteker'] },
-    { id: 'pembayaran', label: 'Pembayaran', icon: 'bi-credit-card', roles: ['Admin', 'Kasir'] }
-  ];
+  showAlert: function(message, isSuccess = true) {
+    const alertBox = document.getElementById('pasien-alert');
+    alertBox.innerText = message;
+    alertBox.className = `alert alert-dismissible fade show p-3 rounded-3 mb-4 d-block ${
+      isSuccess ? 'alert-success border-success-subtle text-success' : 'alert-danger border-danger-subtle text-danger'
+    }`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => alertBox.className = 'hidden', 5000);
+  },
 
-  const userAvatar = AppState.user ? (AppState.user.avatar || 'avatar.jpg') : 'avatar.jpg';
+  /**
+   * Mengirim data registrasi pasien ke backend GAS
+   */
+  handleRegistrasi: async function(e) {
+    e.preventDefault();
+    const btnSubmit = document.getElementById('btn-submit-pasien');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...`;
 
-  let htmlMenu = `
-    <div class="sidebar-header">
-      <a class="brand-mark" href="#" onclick="navigateTo('dashboard')">
-        <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
-        <span class="brand-copy">
-          <span class="brand-title">Klinik Sehat</span>
-          <span class="brand-subtitle">SIMRS v3.0</span>
-        </span>
-      </a>
-    </div>
-    <nav class="sidebar-nav custom-scrollbar">`;
+    const payload = {
+      api_key: CONFIG.API_KEY,
+      action: 'tambahPasien',
+      nik: document.getElementById('reg-nik').value,
+      nama: document.getElementById('reg-nama').value,
+      tanggal_lahir: document.getElementById('reg-tgl-lahir').value,
+      jenis_kelamin: document.getElementById('reg-jk').value,
+      jenis_penjamin: document.getElementById('reg-penjamin').value,
+      nomor_hp: document.getElementById('reg-hp').value,
+      alamat: document.getElementById('reg-alamat').value
+    };
 
-  menuItems.forEach(item => {
-    if (role === 'Admin' || item.roles.includes(role)) {
-      htmlMenu += `
-        <a class="nav-link" href="#" id="menu-btn-${item.id}" onclick="navigateTo('${item.id}')">
-          <span class="nav-icon"><i class="bi ${item.icon}" aria-hidden="true"></i></span>
-          <span class="nav-text">${item.label}</span>
-        </a>`;
-    }
-  });
+    try {
+      const response = await fetch(CONFIG.BASE_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
 
-  htmlMenu += `
-    </nav>
-    <div class="sidebar-user">
-      <img class="avatar-img avatar-md sidebar-user-avatar" src="assets/js/images/avatar/${userAvatar}" alt="Profile">
-      <strong>${AppState.user ? AppState.user.nama : 'Staf'}</strong>
-      <small>${role} Area</small>
-    </div>
-    <div class="sidebar-footer">
-      <span class="status-dot" style="background-color: #22c55e;"></span>
-      <span class="sidebar-footer-text">Klinik Terkoneksi</span>
-    </div>`;
-  
-  sidebarNav.innerHTML = htmlMenu;
-}
+      const res = await response.json();
 
-function updateSidebarActiveState(activeId) {
-  const links = document.querySelectorAll('.sidebar-nav .nav-link');
-  links.forEach(link => link.classList.remove('active'));
-  
-  const activeLink = document.getElementById(`menu-btn-${activeId}`);
-  if (activeLink) activeLink.classList.add('active');
-}
-
-function renderLoginView() {
-  const loginSection = document.getElementById('login-section');
-  loginSection.innerHTML = `
-    <main class="auth-page">
-      <section class="auth-card">
-        <a class="auth-brand" href="#"><span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span><span><strong>Klinik Sehat</strong><small>Sistem Informasi Manajemen Pelayanan Pasien</small></span></a>
-        <div class="auth-visual"><div class="bg-primary text-white p-4 text-center h-100 d-flex align-items-center justify-content-center fw-bold">KLINIK SEHAT SYSTEM ENGINE</div></div>
-        <form onsubmit="executeLogin(event)">
-          <div class="mb-4">
-            <h1 class="h3 mb-1">Masuk Sistem</h1>
-            <p class="text-muted mb-0">Silakan gunakan kredensial staf aktif Anda.</p>
-          </div>
-          <div id="login-error-box" class="hidden alert alert-danger p-2 small mb-3"></div>
-          <div class="mb-3">
-            <label class="form-label" for="login-username">Username</label>
-            <input class="form-control" id="login-username" type="text" value="admin" required>
-          </div>
-          <div class="mb-4">
-            <label class="form-label" for="login-password">Password</label>
-            <input class="form-control" id="login-password" type="password" value="admin123" required>
-          </div>
-          <button class="btn btn-primary w-100" type="submit" id="login-submit-btn">Masuk Ke Sistem</button>
-        </form>
-      </section>
-    </main>`;
-}
-
-async function executeLogin(e) {
-  e.preventDefault();
-  const userIn = document.getElementById('login-username').value;
-  const passIn = document.getElementById('login-password').value;
-  const errorBox = document.getElementById('login-error-box');
-  const btnSubmit = document.getElementById('login-submit-btn');
-
-  errorBox.classList.add('hidden');
-  btnSubmit.disabled = true;
-  btnSubmit.innerText = "Memverifikasi...";
-
-  // Dummy login bypass untuk development testing jika server Apps Script offline
-  if(userIn === "admin" && passIn === "admin123") {
-    AppState.user = { nama: "Admin Hasan", role: "Admin", avatar: "avatar.jpg" };
-    navigateTo('pendaftaran');
-    return;
-  }
-
-  try {
-    const targetUrl = `${CONFIG.BASE_URL}?api_key=${encodeURIComponent(CONFIG.API_KEY)}`;
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' }, 
-      body: JSON.stringify({ api_key: CONFIG.API_KEY, action: 'login', username: userIn, password: passIn })
-    });
-    const resData = await response.json();
-    if (resData.success) {
-      AppState.user = { ...resData.data, avatar: 'avatar.jpg' };
-      navigateTo('dashboard');
-    } else {
-      errorBox.innerText = resData.message || "Kredensial salah.";
-      errorBox.classList.remove('hidden');
+      if (res.success) {
+        this.showAlert(`Sukses! Pasien baru berhasil didaftarkan. Nomor RM: ${res.data.no_rm}`);
+        document.getElementById('form-registrasi-pasien').reset();
+        
+        document.getElementById('search-keyword').value = res.data.no_rm;
+        this.cariPasien();
+      } else {
+        this.showAlert(res.message || "Gagal mendaftarkan pasien.", false);
+      }
+    } catch (err) {
+      this.showAlert("Error: Tidak dapat terhubung ke server backend.", false);
+    } finally {
       btnSubmit.disabled = false;
-      btnSubmit.innerText = "Masuk Ke Sistem";
+      btnSubmit.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru`;
     }
-  } catch (err) {
-    errorBox.innerText = "Gagal menghubungi server Apps Script.";
-    errorBox.classList.remove('hidden');
-    btnSubmit.disabled = false;
-    btnSubmit.innerText = "Masuk Ke Sistem";
+  },
+
+  selectedPasienRM: null,
+
+  /**
+   * Mengambil data pencarian pasien dari API Backend
+   */
+  cariPasien: async function() {
+    const kw = document.getElementById('search-keyword').value.trim();
+    const resultsContainer = document.getElementById('search-results-container');
+    const emptyPlaceholder = document.getElementById('search-empty-placeholder');
+
+    if (!kw) {
+      this.showAlert("Masukkan kata kunci pencarian (NIK/Nama/RM).", false);
+      return;
+    }
+
+    resultsContainer.classList.add('hidden');
+    emptyPlaceholder.innerHTML = `<span class="spinner-border spinner-border-sm text-primary mb-2 d-block mx-auto" role="status"></span>Sedang mencari data pasien...`;
+
+    try {
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=cariPasien&keyword=${encodeURIComponent(kw)}`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+      const res = await response.json();
+
+      if (res.success && res.data.length > 0) {
+        const pasien = res.data[0];
+        
+        this.selectedPasienRM = pasien.no_rm;
+        document.getElementById('target-no-rm').innerText = pasien.no_rm;
+        document.getElementById('target-nama').innerText = pasien.nama;
+        document.getElementById('target-nik').innerText = pasien.nik;
+        
+        const penjaminBadge = document.getElementById('target-penjamin');
+        penjaminBadge.innerText = pasien.jenis_penjamin;
+        if (pasien.jenis_penjamin === 'BPJS') {
+          penjaminBadge.className = "badge text-bg-primary mt-1";
+        } else {
+          penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+        }
+
+        emptyPlaceholder.classList.add('hidden');
+        resultsContainer.classList.remove('hidden');
+      } else {
+        emptyPlaceholder.innerHTML = `
+          <i class="bi bi-exclamation-circle text-danger display-6 d-block mb-2"></i>
+          Data pasien tidak ditemukan. Silakan daftarkan sebagai pasien baru di panel sebelah kiri.`;
+        this.selectedPasienRM = null;
+      }
+    } catch (err) {
+      emptyPlaceholder.innerHTML = `<i class="bi bi-x-circle text-danger display-6 d-block mb-2"></i>Gagal memproses pencarian pasien.`;
+      this.showAlert("Error koneksi data saat mencari pasien.", false);
+    }
+  },
+
+  /**
+   * Check-in pasien terdaftar ke antrean poliklinik tertentu
+   */
+  checkInAntrean: async function() {
+    if (!this.selectedPasienRM) {
+      this.showAlert("Silakan cari dan pilih pasien terlebih dahulu.", false);
+      return;
+    }
+
+    const poli = document.getElementById('queue-poli').value;
+    const dokter = document.getElementById('queue-dokter').value;
+
+    const payload = {
+      api_key: CONFIG.API_KEY,
+      action: 'tambahAntrian',
+      no_rm: this.selectedPasienRM,
+      id_poli: poli,
+      id_dokter: dokter
+    };
+
+    try {
+      const response = await fetch(CONFIG.BASE_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+
+      const res = await response.json();
+
+      if (res.success) {
+        this.showAlert(`Sukses! Nomor Antrean berhasil dicetak: ${res.data.no_antrian} (${poli})`);
+        document.getElementById('search-results-container').classList.add('hidden');
+        document.getElementById('search-empty-placeholder').classList.remove('hidden');
+        document.getElementById('search-empty-placeholder').innerHTML = `
+          <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
+          <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>`;
+        document.getElementById('search-keyword').value = "";
+        this.selectedPasienRM = null;
+      } else {
+        this.showAlert(res.message || "Gagal memproses check-in antrean.", false);
+      }
+    } catch (err) {
+      this.showAlert("Error: Koneksi server bermasalah saat check-in.", false);
+    }
   }
-}
+};
 
-function executeLogout() {
-  AppState.user = null;
-  navigateTo('login');
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  navigateTo('login');
-});
+window.PasienModule = PasienModule;
