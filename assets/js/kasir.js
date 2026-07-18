@@ -18,18 +18,18 @@ const KasirModule = {
         <!-- Alert Box untuk notifikasi sistem -->
         <div id="kasir-alert" class="alert d-none" role="alert"></div>
 
-        <!-- Panel Lookup Input -->
-        <div class="card shadow-sm mb-4 border-0">
+        <!-- Panel Lookup Input (Bypass Mode via Direct Flex) -->
+        <div class="card shadow-sm mb-4 border-0 bg-white">
           <div class="card-body p-4">
-            <div class="row g-3 align-items-end">
-              <div class="col-12 col-md-9">
-                <label class="form-label small fw-bold text-uppercase text-muted tracking-wider mb-2">
+            <div class="d-flex flex-column flex-md-row align-items-md-end w-100 style="gap: 15px;">
+              <div class="flex-grow-1 w-100">
+                <label class="form-label small fw-bold text-uppercase text-muted tracking-wider mb-2 d-block">
                   <i class="bi bi-search me-1"></i> Masukkan ID Antrean Aktif (Contoh: ANT-2026...)
                 </label>
-                <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="form-control form-control-lg">
+                <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="form-control form-control-lg w-100 block d-block">
               </div>
-              <div class="col-12 col-md-3">
-                <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg w-100 fw-medium text-nowrap" style="height: calc(3.5rem + 2px);">
+              <div class="flex-shrink-0">
+                <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg fw-medium text-nowrap w-100" style="padding: 10px 25px; min-height: 48px;">
                   Kalkulasi Tagihan
                 </button>
               </div>
@@ -42,7 +42,7 @@ const KasirModule = {
           
           <!-- Kiri (7 Kolom): Rincian Komponen Invoice Tagihan -->
           <div class="col-12 col-lg-7">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 bg-white">
               <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
                 <h3 class="card-title h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
                   <i class="bi bi-receipt me-2 text-primary"></i> Rincian Komponen Biaya
@@ -97,7 +97,7 @@ const KasirModule = {
 
           <!-- Kanan (5 Kolom): Settlement Pembayaran -->
           <div class="col-12 col-lg-5">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 bg-white">
               <div class="card-header bg-white py-3 border-bottom-0">
                 <h3 class="card-title h6 fw-bold text-uppercase tracking-wider text-dark mb-0">
                   <i class="bi bi-wallet2 me-2 text-success"></i> Metode Pembayaran & Pelunasan
@@ -136,8 +136,8 @@ const KasirModule = {
         </div>
 
         <!-- Empty State Workspace -->
-        <div id="kasir-empty-workspace" class="card shadow-sm border-0 text-center py-5 mb-4">
-          <div class="card-body text-muted py-4 italic">
+        <div id="kasir-empty-workspace" class="card shadow-sm border-0 text-center py-5 mb-4 bg-white">
+          <div class="card-body text-muted py-4 italic border-0">
             <i class="bi bi-inboxes text-secondary h1 d-block mb-3"></i>
             Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
           </div>
@@ -145,6 +145,7 @@ const KasirModule = {
       </div>
     `;
   },
+  
   init: function() {
     this.activeBillingData = null;
   },
