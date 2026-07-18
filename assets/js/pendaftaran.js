@@ -8,7 +8,7 @@ window.PasienModule = window.PasienModule || {
 
   render: function() {
     return `
-      <div class="row pair-fade-in">
+      <div class="row pair-fade-in text-dark">
         <div class="col-12">
           <div id="pendaftaran-alert" class="alert d-none" role="alert"></div>
         </div>
@@ -69,9 +69,9 @@ window.PasienModule = window.PasienModule || {
           </div>
         </div>
 
-        <!-- PANEL KANAN: Cari & Antrean Poliklinik -->
+        <!-- PANEL KANAN: Cari, Alokasi & Live Monitor Terintegrasi -->
         <div class="col-12 col-lg-7 mb-4">
-          <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+          <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <div class="p-2 bg-primary-subtle text-primary rounded-3 me-3">
@@ -110,7 +110,7 @@ window.PasienModule = window.PasienModule || {
                     <label class="form-label small fw-bold text-muted">Dokter Pemeriksa</label>
                     <select id="antrean-dokter" class="form-select form-select-sm">
                       <option value="dr. Ahmad Faisal">dr. Ahmad Faisal</option>
-                      <option value="drg. Citra Lestari">drg. Citri Lestari</option>
+                      <option value="drg. Citra Lestari">drg. Citra Lestari</option>
                       <option value="dr. Eka Wijaya">dr. Eka Wijaya</option>
                     </select>
                   </div>
@@ -124,44 +124,40 @@ window.PasienModule = window.PasienModule || {
               </div>
 
               <!-- Placeholder State saat Pencarian Kosong -->
-              <div id="antrean-empty-state" class="text-center py-5 text-muted border rounded-3 border-dashed">
-                <i class="bi bi-card-checklist display-6 d-block mb-3 text-secondary" style="opacity: 0.5;"></i>
+              <div id="antrean-empty-state" class="text-center py-4 text-muted border rounded-3 border-dashed mb-4">
+                <i class="bi bi-card-checklist fs-3 d-block mb-2 text-secondary" style="opacity: 0.5;"></i>
                 <p class="mb-0 small px-4">Silakan ketik kata kunci pencarian di atas atau daftarkan pasien baru untuk memproses antrean.</p>
               </div>
 
-            </div>
-          </div>
-        </div>
+              <!-- PUSAT LIVE MONITORING PER HARI INI (DIINJEK KE DALAM CARD KANAN BIAR ANTI-CLIP) -->
+              <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 class="h6 text-uppercase fw-bold text-secondary mb-0" style="font-size: 0.8rem; tracking-wider: 0.05em;">
+                    <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Pasien Terdaftar Hari Ini
+                  </h3>
+                  <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-xs btn-outline-secondary px-2 py-0.5" type="button">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
+                  </button>
+                </div>
+                <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
+                  <table class="table table-hover align-middle mb-0 small text-nowrap">
+                    <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
+                      <tr>
+                        <th class="py-2 px-3">No. RM</th>
+                        <th class="py-2">Nama Pasien</th>
+                        <th class="py-2">Penjamin</th>
+                        <th class="py-2 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pendaftaran-live-monitor-tbody">
+                      <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-        <!-- PANEL BAWAH: Real-time Monitoring Pasien Hari Ini (Ditempatkan terpisah agar aman) -->
-        <div class="col-12 mt-4">
-          <div class="card border-0 shadow-sm rounded-3 bg-white">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
-                  <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Daftar Pendaftaran Pasien Hari Ini
-                </h3>
-                <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button">
-                  <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
-                </button>
-              </div>
-              <div class="table-responsive border rounded-3" style="max-height: 350px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0 small text-nowrap">
-                  <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
-                    <tr>
-                      <th class="py-2.5 px-3">No. RM</th>
-                      <th class="py-2.5">Nama Pasien</th>
-                      <th class="py-2.5">Penjamin</th>
-                      <th class="py-2.5 text-center">Tindakan</th>
-                    </tr>
-                  </thead>
-                  <tbody id="pendaftaran-live-monitor-tbody">
-                    <tr>
-                      <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
@@ -198,8 +194,8 @@ window.PasienModule = window.PasienModule || {
             <td class="py-2 fw-medium text-dark">${pasien.nama}</td>
             <td class="py-2"><span class="badge bg-light text-dark border px-2 py-0.5">${pasien.jenis_penjamin || 'Umum'}</span></td>
             <td class="py-2 text-center">
-              <button onclick='PasienModule.pilihPasienDariTabel(${JSON.stringify(pasien)})' class="btn btn-xs btn-primary fw-bold py-0.5 px-2 shadow-xs">
-                <i class="bi bi-box-arrow-up me-1"></i> Proses Alokasi
+              <button onclick='PasienModule.pilihPasienDariTabel(${JSON.stringify(pasien)})' class="btn btn-xs btn-primary fw-bold py-0.5 px-2">
+                <i class="bi bi-box-arrow-up me-1"></i> Alokasi
               </button>
             </td>
           </tr>
@@ -207,14 +203,14 @@ window.PasienModule = window.PasienModule || {
       } else {
         tbody.innerHTML = `
           <tr>
-            <td colspan="4" class="text-center py-5 text-muted">
-              <i class="bi bi-folder-x h2 d-block mb-2 text-secondary"></i>
-              Belum ada pendaftaran pasien untuk hari ini.
+            <td colspan="4" class="text-center py-4 text-muted small">
+              <i class="bi bi-folder-x d-block mb-1 fs-4 text-secondary"></i>
+              Belum ada pendaftaran hari ini.
             </td>
           </tr>`;
       }
     } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger">Gagal sinkronisasi antrean monitor.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger small">Gagal sinkronisasi antrean monitor.</td></tr>`;
     }
   },
 
