@@ -16,11 +16,11 @@ const PasienModule = {
         <!-- Alert Notification Box Bawaan Bootstrap -->
         <div id="pasien-alert" class="hidden alert alert-dismissible fade show p-3 rounded-3 mb-4" role="alert"></div>
 
-        <div class="row g-4">
+        <div class="row g-4 text-dark">
           
           <!-- Kiri: Form Registrasi Pasien Baru -->
           <div class="col-12 col-lg-5">
-            <div class="panel h-100">
+            <div class="panel">
               <div class="panel-header border-b pb-3 mb-4">
                 <h3 class="h5 section-title mb-0">
                   <i class="bi bi-pencil-square me-2"></i>Pasien Baru
@@ -77,7 +77,7 @@ const PasienModule = {
             </div>
           </div>
 
-          <!-- Kanan: Pencarian Pasien, Check-in Antrean Poli & Monitor Harian -->
+          <!-- Kanan: Pencarian Pasien, Check-in Antrean Poli & Monitor Terintegrasi -->
           <div class="col-12 col-lg-7">
             <div class="panel mb-4">
               <div class="panel-header border-b pb-3 mb-4">
@@ -94,7 +94,7 @@ const PasienModule = {
               </div>
 
               <!-- Hasil Pencarian Wrapper -->
-              <div id="search-results-container" class="hidden border rounded-3 p-4 bg-body-secondary mb-3">
+              <div id="search-results-container" class="hidden border rounded-3 p-4 bg-body-secondary mb-4">
                 <div class="border-bottom pb-3 mb-4">
                   <h4 class="small fw-bold text-uppercase tracking-wider text-muted mb-3">Data Pasien Ditemukan:</h4>
                   <div class="row g-3">
@@ -147,43 +147,44 @@ const PasienModule = {
               </div>
               
               <!-- Placeholder jika data kosong -->
-              <div id="search-empty-placeholder" class="blank-state py-5 text-center my-auto mx-auto text-muted">
-                <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
-                <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>
+              <div id="search-empty-placeholder" class="blank-state py-4 text-center text-muted mb-4 border rounded-3 border-dashed">
+                <i class="bi bi-person-vcard fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                <p class="mb-0 small px-3">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>
               </div>
-            </div>
 
-            <!-- INTEGRASI LIVE MONITOR PANEL BAWAH KANAN (Anti-Clip Grid) -->
-            <div class="panel">
-              <div class="panel-header border-b pb-3 mb-3 d-flex justify-content-between align-items-center">
-                <h3 class="h5 section-title mb-0">
-                  <i class="bi bi-calendar-check me-2 text-warning"></i>Pasien Terdaftar Hari Ini
-                </h3>
-                <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button">
-                  <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
-                </button>
+              <!-- REAL-TIME MONITOR HARI INI (AMNESTI LAYOUT: STRUKTUR DI DALAM PANEL UTAMA KANAN) -->
+              <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="h6 text-uppercase fw-bold text-secondary mb-0" style="font-size: 0.8rem;">
+                    <i class="bi bi-calendar-check me-2 text-warning"></i>Pasien Terdaftar Hari Ini
+                  </h4>
+                  <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-xs btn-outline-secondary px-2 py-0.5" type="button">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
+                  </button>
+                </div>
+                
+                <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
+                  <table class="table table-hover align-middle mb-0 small text-nowrap">
+                    <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
+                      <tr>
+                        <th class="py-2 px-3">No. RM</th>
+                        <th class="py-2">Nama Pasien</th>
+                        <th class="py-2">Penjamin</th>
+                        <th class="py-2 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pendaftaran-live-monitor-tbody">
+                      <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              
-              <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0 small text-nowrap">
-                  <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
-                    <tr>
-                      <th class="py-2.5 px-3">No. RM</th>
-                      <th class="py-2">Nama Pasien</th>
-                      <th class="py-2">Penjamin</th>
-                      <th class="py-2 text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody id="pendaftaran-live-monitor-tbody">
-                    <tr>
-                      <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
 
+            </div>
           </div>
+
         </div>
       </div>
     `;
@@ -199,6 +200,7 @@ const PasienModule = {
 
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('pasien-alert');
+    if (!alertBox) return;
     alertBox.innerText = message;
     alertBox.className = `alert alert-dismissible fade show p-3 rounded-3 mb-4 d-block ${
       isSuccess ? 'alert-success border-success-subtle text-success' : 'alert-danger border-danger-subtle text-danger'
@@ -258,15 +260,19 @@ const PasienModule = {
     document.getElementById('target-nik').innerText = pasien.nik || '-';
     
     const penjaminBadge = document.getElementById('target-penjamin');
-    penjaminBadge.innerText = pasien.jenis_penjamin;
-    if (pasien.jenis_penjamin === 'BPJS') {
-      penjaminBadge.className = "badge text-bg-primary mt-1";
-    } else {
-      penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+    if (penjaminBadge) {
+      penjaminBadge.innerText = pasien.jenis_penjamin || 'Umum';
+      if (pasien.jenis_penjamin === 'BPJS') {
+        penjaminBadge.className = "badge text-bg-primary mt-1";
+      } else {
+        penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+      }
     }
 
-    document.getElementById('search-empty-placeholder').classList.add('hidden');
-    document.getElementById('search-results-container').classList.remove('hidden');
+    const emptyPlaceholder = document.getElementById('search-empty-placeholder');
+    const resultsContainer = document.getElementById('search-results-container');
+    if (emptyPlaceholder) emptyPlaceholder.classList.add('hidden');
+    if (resultsContainer) resultsContainer.classList.remove('hidden');
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
@@ -277,6 +283,7 @@ const PasienModule = {
   handleRegistrasi: async function(e) {
     e.preventDefault();
     const btnSubmit = document.getElementById('btn-submit-pasien');
+    if (!btnSubmit) return;
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...`;
 
@@ -316,7 +323,7 @@ const PasienModule = {
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Daftarkan Pasien Baru`;
-      this.loadLiveMonitor(); // Otomatis refresh tabel monitor setelah input sukses
+      this.loadLiveMonitor();
     }
   },
 
@@ -333,8 +340,8 @@ const PasienModule = {
       return;
     }
 
-    resultsContainer.classList.add('hidden');
-    emptyPlaceholder.innerHTML = `<span class="spinner-border spinner-border-sm text-primary mb-2 d-block mx-auto" role="status"></span>Sedang mencari data pasien...`;
+    if (resultsContainer) resultsContainer.classList.add('hidden');
+    if (emptyPlaceholder) emptyPlaceholder.innerHTML = `<span class="spinner-border spinner-border-sm text-primary mb-2 d-block mx-auto" role="status"></span>Sedang mencari data pasien...`;
 
     try {
       const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=cariPasien&keyword=${encodeURIComponent(kw)}`;
@@ -350,23 +357,27 @@ const PasienModule = {
         document.getElementById('target-nik').innerText = pasien.nik;
         
         const penjaminBadge = document.getElementById('target-penjamin');
-        penjaminBadge.innerText = pasien.jenis_penjamin || pasien.penjamin || 'Umum';
-        if (penjaminBadge.innerText === 'BPJS') {
-          penjaminBadge.className = "badge text-bg-primary mt-1";
-        } else {
-          penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+        if (penjaminBadge) {
+          penjaminBadge.innerText = pasien.jenis_penjamin || pasien.penjamin || 'Umum';
+          if (penjaminBadge.innerText === 'BPJS') {
+            penjaminBadge.className = "badge text-bg-primary mt-1";
+          } else {
+            penjaminBadge.className = "badge text-bg-warning text-dark mt-1";
+          }
         }
 
-        emptyPlaceholder.classList.add('hidden');
-        resultsContainer.classList.remove('hidden');
+        if (emptyPlaceholder) emptyPlaceholder.classList.add('hidden');
+        if (resultsContainer) resultsContainer.classList.remove('hidden');
       } else {
-        emptyPlaceholder.innerHTML = `
-          <i class="bi bi-exclamation-circle text-danger display-6 d-block mb-2"></i>
-          Data pasien tidak ditemukan. Silakan daftarkan sebagai pasien baru di panel sebelah kiri.`;
+        if (emptyPlaceholder) {
+          emptyPlaceholder.innerHTML = `
+            <i class="bi bi-exclamation-circle text-danger display-6 d-block mb-2"></i>
+            Data pasien tidak ditemukan. Silakan daftarkan sebagai pasien baru di panel sebelah kiri.`;
+        }
         this.selectedPasienRM = null;
       }
     } catch (err) {
-      emptyPlaceholder.innerHTML = `<i class="bi bi-x-circle text-danger display-6 d-block mb-2"></i>Gagal memproses pencarian pasien.`;
+      if (emptyPlaceholder) emptyPlaceholder.innerHTML = `<i class="bi bi-x-circle text-danger display-6 d-block mb-2"></i>Gagal memproses pencarian pasien.`;
       this.showAlert("Error koneksi data saat mencari pasien.", false);
     }
   },
@@ -403,11 +414,13 @@ const PasienModule = {
 
       if (res.success) {
         this.showAlert(`Sukses! Nomor Antrean berhasil dicetak: ${res.data.no_antrian} (${poli})`);
-        document.getElementById('search-results-container').classList.add('hidden');
-        document.getElementById('search-empty-placeholder').classList.remove('hidden');
-        document.getElementById('search-empty-placeholder').innerHTML = `
-          <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
-          <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>`;
+        if (resultsContainer) resultsContainer.classList.add('hidden');
+        if (emptyPlaceholder) {
+          emptyPlaceholder.classList.remove('hidden');
+          emptyPlaceholder.innerHTML = `
+            <i class="bi bi-person-vcard display-4 d-block mb-3 text-opacity-25 text-secondary"></i>
+            <p class="mb-0">Silakan ketik kata kunci pencarian di atas untuk memproses antrean.</p>`;
+        }
         document.getElementById('search-keyword').value = "";
         this.selectedPasienRM = null;
       } else {
@@ -416,7 +429,7 @@ const PasienModule = {
     } catch (err) {
       this.showAlert("Error: Koneksi server bermasalah saat check-in.", false);
     } finally {
-      this.loadLiveMonitor(); // Sinkronisasi ulang tabel monitor
+      this.loadLiveMonitor();
     }
   }
 };
