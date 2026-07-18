@@ -69,7 +69,7 @@ window.PasienModule = window.PasienModule || {
           </div>
         </div>
 
-        <!-- PANEL KANAN: Cari, Alokasi & Live Monitor Terintegrasi -->
+        <!-- PANEL KANAN: Cari & Antrean Poliklinik -->
         <div class="col-12 col-lg-7 mb-4">
           <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
             <div class="card-body p-4">
@@ -86,7 +86,7 @@ window.PasienModule = window.PasienModule || {
                 <button onclick="PasienModule.cariPasienManual()" class="btn btn-dark fw-bold px-4" type="button">Cari Pasien</button>
               </div>
 
-              <!-- Area Eksplisit Form Alokasi Poli -->
+              <!-- Area Form Alokasi Poli -->
               <div id="antrean-execution-card" class="d-none border border-primary-subtle rounded-3 p-4 bg-light mb-4 shadow-sm">
                 <div class="row g-2 small border-bottom pb-3 mb-3 text-dark">
                   <div class="col-6 col-sm-3">No. RM: <strong class="text-primary d-block font-monospace" id="exc-rm">-</strong></div>
@@ -123,43 +123,45 @@ window.PasienModule = window.PasienModule || {
                 </div>
               </div>
 
-              <!-- Placeholder State saat Pencarian Kosong -->
+              <!-- Placeholder State -->
               <div id="antrean-empty-state" class="text-center py-4 text-muted border rounded-3 border-dashed mb-4">
                 <i class="bi bi-card-checklist fs-3 d-block mb-2 text-secondary" style="opacity: 0.5;"></i>
                 <p class="mb-0 small px-4">Silakan ketik kata kunci pencarian di atas atau daftarkan pasien baru untuk memproses antrean.</p>
               </div>
-
-              <!-- PUSAT LIVE MONITORING PER HARI INI (DIINJEK KE DALAM CARD KANAN BIAR ANTI-CLIP) -->
-              <div class="mt-4 pt-4 border-top">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h3 class="h6 text-uppercase fw-bold text-secondary mb-0" style="font-size: 0.8rem; tracking-wider: 0.05em;">
-                    <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Pasien Terdaftar Hari Ini
-                  </h3>
-                  <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-xs btn-outline-secondary px-2 py-0.5" type="button">
-                    <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
-                  </button>
-                </div>
-                <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
-                  <table class="table table-hover align-middle mb-0 small text-nowrap">
-                    <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
-                      <tr>
-                        <th class="py-2 px-3">No. RM</th>
-                        <th class="py-2">Nama Pasien</th>
-                        <th class="py-2">Penjamin</th>
-                        <th class="py-2 text-center">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody id="pendaftaran-live-monitor-tbody">
-                      <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
             </div>
           </div>
+
+          <!-- TABEL MONITOR DI LUAR CARD UTAMA KANAN AGAR TERPISAH STRUKTURNYA -->
+          <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h6 text-uppercase fw-bold text-secondary mb-0">
+                  <i class="bi bi-calendar-check-fill me-2 text-warning"></i>Pasien Terdaftar Hari Ini
+                </h3>
+                <button onclick="PasienModule.loadLiveMonitor()" class="btn btn-sm btn-outline-secondary px-3" type="button">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Sync Data
+                </button>
+              </div>
+              <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 small text-nowrap">
+                  <thead class="table-light fw-bold text-muted position-sticky top-0 shadow-sm z-1">
+                    <tr>
+                      <th class="py-2 px-3">No. RM</th>
+                      <th class="py-2">Nama Pasien</th>
+                      <th class="py-2">Penjamin</th>
+                      <th class="py-2 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendaftaran-live-monitor-tbody">
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">Memuat data monitor pasien hari ini...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     `;
