@@ -1,6 +1,6 @@
 /**
  * app.js
- * Core SPA Router Engine - Secured Layout Wrapper for adminHMD Template
+ * Core SPA Router Engine - Path Customization for assets/js/ Folder Structure
  */
 
 const AppState = {
@@ -36,9 +36,9 @@ function renderLayout() {
 
   mainLayout.classList.remove('hidden');
   
-  // Sinkronisasi Data Profil Topbar
+  // Sinkronisasi Data Profil Topbar dengan penyesuaian folder images
   document.getElementById('topbar-username').innerText = AppState.user.nama;
-  document.getElementById('topbar-avatar').src = `assets/images/avatar/${AppState.user.avatar}`;
+  document.getElementById('topbar-avatar').src = `assets/js/images/avatar/${AppState.user.avatar}`;
 
   renderSidebarMenu(AppState.user.role);
   updateSidebarActiveState(AppState.currentView);
@@ -59,7 +59,9 @@ function renderLayout() {
         </div>
         <div class="panel mt-4">
           <div class="panel-header"><h2 class="h5 mb-0 section-title"><span>Status Sistem</span></h2></div>
-          <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
+          <div class="panel-body">
+            <p class="text-muted mb-0">Gunakan bar menu navigasi di sebelah kiri untuk mengakses modul pelayanan operasional klinik.</p>
+          </div>
         </div>`;
       break;
 
@@ -108,9 +110,6 @@ function renderLayout() {
   }
 }
 
-/**
- * Fungsi Pengaman: Membungkus Konten Modul Menggunakan Struktur Panel adminHMD Asli
- */
 function wrapModuleContent(title, iconClass, description, moduleObject) {
   const contentContainer = document.getElementById('main-content-stream');
   
@@ -132,9 +131,11 @@ function wrapModuleContent(title, iconClass, description, moduleObject) {
   } else {
     contentContainer.innerHTML = headerHtml + `
       <div class="panel mt-4">
-        <div class="blank-state py-5 text-center">
-          <h2 class="h5 mb-2">${title} Belum Dimuat</h2>
-          <p class="text-muted mb-0">File JavaScript pendukung modul ini sedang dalam tahap kustomisasi layout template baru.</p>
+        <div class="panel-body">
+          <div class="blank-state py-5 text-center">
+            <h2 class="h5 mb-2">${title} Belum Dimuat</h2>
+            <p class="text-muted mb-0">File JavaScript pendukung modul ini sedang dalam tahap kustomisasi layout template baru.</p>
+          </div>
         </div>
       </div>`;
   }
@@ -184,7 +185,7 @@ function renderSidebarMenu(role) {
   htmlMenu += `
     </nav>
     <div class="sidebar-user">
-      <img class="avatar-img avatar-md sidebar-user-avatar" src="assets/images/avatar/${userAvatar}" alt="Profile">
+      <img class="avatar-img avatar-md sidebar-user-avatar" src="assets/js/images/avatar/${userAvatar}" alt="Profile">
       <strong>${AppState.user.nama}</strong>
       <small>${role} Area</small>
     </div>
@@ -212,7 +213,7 @@ function renderLoginView() {
     <main class="auth-page">
       <section class="auth-card">
         <a class="auth-brand" href="#"><span class="brand-icon"><i class="bi bi-grid-1x2-fill"></i></span><span><strong>Klinik Sehat</strong><small>Sistem Informasi Manajemen Pelayanan Pasien</small></span></a>
-        <div class="auth-visual"><img src="assets/images/png/dasher-ai.png" alt="Visual"></div>
+        <div class="auth-visual"><img src="assets/js/images/png/dasher-ai.png" alt="Visual"></div>
         <form onsubmit="executeLogin(event)">
           <div class="mb-4">
             <h1 class="h3 mb-1">Masuk Sistem</h1>
