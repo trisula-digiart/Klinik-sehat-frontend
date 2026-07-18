@@ -115,8 +115,7 @@ function renderLayout() {
       break;
 
     case 'pendaftaran':
-      // Memastikan modul mengarah ke window.PendaftaranModule yang dideklarasikan di pendaftaran.js
-      wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PendaftaranModule);
+      wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PasienModule);
       break;
 
     case 'antrian':
