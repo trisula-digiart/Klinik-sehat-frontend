@@ -72,9 +72,9 @@ function renderLayout() {
       break;
 
     case 'rekam_medis':
-      wrapModuleContent("Rekam Medis", "bi-journal-medical", "Berkas digital rekam medis pasien terintegrasi.", null);
+      wrapModuleContent("Rekam Medis", "bi-journal-medical", "Berkas digital rekam medis pasien terintegrasi.", window.RekamMedisModule);
       break;
-
+      
     case 'pemeriksaan':
       wrapModuleContent("Pemeriksaan", "bi-activity", "Ruang periksa dokter, pencatatan diagnosa, dan terapi SOAP.", window.DokterModule);
       break;
