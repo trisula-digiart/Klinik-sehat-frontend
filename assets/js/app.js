@@ -27,6 +27,8 @@ function renderLayout() {
   const mainLayout = document.getElementById('main-layout');
   const contentContainer = document.getElementById('main-content-stream');
 
+  if (!loginSection || !mainLayout || !contentContainer) return;
+
   loginSection.classList.add('hidden');
   mainLayout.classList.add('hidden');
 
@@ -39,10 +41,12 @@ function renderLayout() {
   mainLayout.classList.remove('hidden');
   
   // Sinkronisasi Data Profil Topbar dengan penyesuaian folder images
-  document.getElementById('topbar-username').innerText = AppState.user.nama;
-  document.getElementById('topbar-avatar').src = `assets/js/images/avatar/${AppState.user.avatar}`;
+  const topbarUser = document.getElementById('topbar-username');
+  const topbarAv = document.getElementById('topbar-avatar');
+  if (topbarUser && AppState.user) topbarUser.innerText = AppState.user.nama;
+  if (topbarAv && AppState.user) topbarAv.src = `assets/js/images/avatar/${AppState.user.avatar}`;
 
-  renderSidebarMenu(AppState.user.role);
+  renderSidebarMenu(AppState.user ? AppState.user.role : '');
   updateSidebarActiveState(AppState.currentView);
 
   // Router Engine & Safe Wrapper Injection
@@ -115,6 +119,7 @@ function renderLayout() {
       break;
 
     case 'pendaftaran':
+      // MENGARAH KE WINDOW.PASIENMODULE YANG DI-INJECT OLEH PENDAFTARAN.JS
       wrapModuleContent("Pendaftaran Pasien", "bi-person-plus", "Manajemen data sosial pasien baru dan lama.", window.PasienModule);
       break;
 
@@ -161,6 +166,7 @@ function renderLayout() {
 
 function wrapModuleContent(title, iconClass, description, moduleObject) {
   const contentContainer = document.getElementById('main-content-stream');
+  if (!contentContainer) return;
   
   let headerHtml = `
     <div class="page-heading">
@@ -190,6 +196,7 @@ function wrapModuleContent(title, iconClass, description, moduleObject) {
 
 function renderSidebarMenu(role) {
   const sidebarNav = document.getElementById('sidebar-navigation');
+  if (!sidebarNav) return;
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2', roles: ['Admin', 'Dokter', 'Apoteker', 'Kasir'] },
@@ -205,7 +212,8 @@ function renderSidebarMenu(role) {
     { id: 'pengaturan', label: 'Pengaturan', icon: 'bi-gear', roles: ['Admin'] }
   ];
 
-  const userAvatar = AppState.user.avatar || 'avatar.jpg';
+  const userAvatar = AppState.user ? (AppState.user.avatar || 'avatar.jpg') : 'avatar.jpg';
+  const username = AppState.user ? AppState.user.nama : 'Guest';
 
   let htmlMenu = `
     <div class="sidebar-header">
@@ -233,7 +241,7 @@ function renderSidebarMenu(role) {
     </nav>
     <div class="sidebar-user">
       <img class="avatar-img avatar-md sidebar-user-avatar" src="assets/js/images/avatar/${userAvatar}" alt="Profile">
-      <strong>${AppState.user.nama}</strong>
+      <strong>${username}</strong>
       <small>${role} Area</small>
     </div>
     <div class="sidebar-footer">
@@ -256,6 +264,7 @@ function updateSidebarActiveState(activeId) {
 
 function renderLoginView() {
   const loginSection = document.getElementById('login-section');
+  if (!loginSection) return;
   loginSection.innerHTML = `
     <main class="auth-page">
       <section class="auth-card">
@@ -287,6 +296,8 @@ async function executeLogin(e) {
   const passIn = document.getElementById('login-password').value;
   const errorBox = document.getElementById('login-error-box');
   const btnSubmit = document.getElementById('login-submit-btn');
+
+  if (!errorBox || !btnSubmit) return;
 
   errorBox.classList.add('hidden');
   btnSubmit.disabled = true;
@@ -364,7 +375,8 @@ window.addEventListener('DOMContentLoaded', () => {
   if (savedSession) {
     try {
       AppState.user = JSON.parse(savedSession);
-      navigateTo('dashboard');
+      // Biarkan memproses routing ke halaman yang sedang dibuka
+      renderLayout();
     } catch (e) {
       localStorage.removeItem('simrs_user_session');
       navigateTo('login');
