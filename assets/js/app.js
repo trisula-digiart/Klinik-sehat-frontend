@@ -90,19 +90,19 @@ function renderLayout() {
       break;
 
     case 'laporan':
-      wrapModuleContent("Laporan", "bi-bar-chart-line", "Pelaporan kunjungan pasien dan rekonsiliasi kasir harian.", null);
+      wrapModuleContent("Laporan", "bi-bar-chart-line", "Pelaporan kunjungan pasien dan rekonsiliasi kasir harian.", window.LaporanModule);
       break;
 
     case 'jadwal_dokter':
-      wrapModuleContent("Jadwal Dokter", "bi-calendar3", "Manajemen shift dokter dan kuota pendaftaran harian.", null);
+      wrapModuleContent("Jadwal Dokter", "bi-calendar3", "Manajemen shift dokter dan kuota pendaftaran harian.", window.LaporanModule);
       break;
 
     case 'pengguna':
-      wrapModuleContent("Pengguna", "bi-people", "Manajemen otorisasi akun personil klinik.", null);
+      wrapModuleContent("Pengguna", "bi-people", "Manajemen otorisasi akun personil klinik.", window.LaporanModule);
       break;
 
     case 'pengaturan':
-      wrapModuleContent("Pengaturan", "bi-gear", "Konfigurasi parameter dasar dan integrasi sistem server.", null);
+      wrapModuleContent("Pengaturan", "bi-gear", "Konfigurasi parameter dasar dan integrasi sistem server.", window.LaporanModule);
       break;
 
     default:
