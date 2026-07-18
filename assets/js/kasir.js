@@ -20,27 +20,53 @@ const KasirModule = {
           <div id="kasir-alert" class="alert d-none" role="alert"></div>
         </div>
 
-        <!-- Panel Lookup Input (Menggunakan Struktur Panel Standar Template) -->
+        <!-- Panel Lookup Input & Live Queue Monitor -->
         <div class="col-12 mb-4">
           <div class="panel">
-            <div class="panel-header py-3">
+            <div class="panel-header py-3 d-flex justify-content-between align-items-center">
               <h2 class="h5 mb-0 section-title">
-                <span><i class="bi bi-search me-2"></i>Pencarian Tagihan Pasien</span>
+                <span><i class="bi bi-people me-2 text-primary"></i>Antrean Pembayaran Live Pasien</span>
               </h2>
+              <button onclick="KasirModule.loadAntreanKasir()" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Antrean
+              </button>
             </div>
             <div class="p-4 bg-white border-top">
-              <div class="row g-3 align-items-end">
+              <!-- Kotak Pencarian Manual (Tetap dipertahankan sebagai opsi cadangan) -->
+              <div class="row g-3 align-items-end mb-4">
                 <div class="col-12 col-md-9">
                   <label class="form-label small fw-bold text-uppercase text-muted tracking-wider mb-2">
-                    Masukkan ID Antrean Aktif (Contoh: ANT-2026...)
+                    Cari Berdasarkan ID Antrean Pasien
                   </label>
                   <input type="text" id="kasir-search-id" placeholder="Ketik atau scan ID Antrean pasien..." class="form-control form-control-lg">
                 </div>
                 <div class="col-12 col-md-3">
-                  <button onclick="KasirModule.hitungBilling()" class="btn btn-dark btn-lg w-100 fw-medium text-nowrap" style="height: calc(3.5rem + 2px);">
+                  <button onclick="KasirModule.hitungBillingManual()" class="btn btn-dark btn-lg w-100 fw-medium text-nowrap" style="height: calc(3.5rem + 2px);">
                     Kalkulasi Tagihan
                   </button>
                 </div>
+              </div>
+
+              <!-- TABEL LIVE ANTREAN OTOMATIS -->
+              <div class="table-responsive border rounded-3">
+                <table class="table table-hover align-middle mb-0 text-center">
+                  <thead class="table-dark small text-uppercase tracking-wider">
+                    <tr>
+                      <th class="py-3">No. Urut</th>
+                      <th class="py-3">ID Antrean</th>
+                      <th class="py-3">No. RM</th>
+                      <th class="py-3">Nama Pasien</th>
+                      <th class="py-3">Poliklinik</th>
+                      <th class="py-3">Status</th>
+                      <th class="py-3">Aksi Operasional</th>
+                    </tr>
+                  </thead>
+                  <tbody id="live-antrean-kasir-list">
+                    <tr>
+                      <td colspan="7" class="text-muted py-4 italic">Sedang memuat daftar pasien aktif dari server...</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -95,7 +121,7 @@ const KasirModule = {
                   </div>
 
                   <!-- Grand Total Display -->
-                  <div class="card bg-dark text-white border-0 shadow-sm shadow-inner">
+                  <div class="card bg-dark text-white border-0 shadow-sm">
                     <div class="card-body p-4 d-flex justify-content-between align-items-center">
                       <span class="small text-uppercase tracking-wider fw-bold text-white-50">Total Tagihan Bersih</span>
                       <span id="invoice-grand-total" class="h3 fw-black text-success mb-0">Rp 0</span>
@@ -136,7 +162,7 @@ const KasirModule = {
                     </div>
                   </div>
 
-                  <button onclick="KasirModule.prosesPelunasan()" id="btn-proses-bayar" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm shadow-md">
+                  <button onclick="KasirModule.prosesPelunasan()" id="btn-proses-bayar" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm">
                     <i class="bi bi-printer me-2"></i> Cetak Invoice & Selesaikan
                   </button>
                 </div>
@@ -151,7 +177,7 @@ const KasirModule = {
           <div class="panel text-center py-5 bg-white">
             <div class="card-body text-muted py-4 italic border-0">
               <i class="bi bi-inboxes text-secondary h1 d-block mb-3 pe-none"></i>
-              Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
+              Pilih salah satu pasien di atas untuk memuat rincian billing tagihan resmi klinik.
             </div>
           </div>
         </div>
@@ -159,12 +185,17 @@ const KasirModule = {
     `;
   },
   
+  /**
+   * Inisialisasi awal modul kasir
+   */
   init: function() {
     this.activeBillingData = null;
+    this.loadAntreanKasir();
   },
 
   showAlert: function(message, isSuccess = true) {
     const alertBox = document.getElementById('kasir-alert');
+    if (!alertBox) return;
     alertBox.innerText = message;
     alertBox.className = `alert p-3 mb-4 d-block ${
       isSuccess ? 'alert-success border-success' : 'alert-danger border-danger'
@@ -172,25 +203,77 @@ const KasirModule = {
     setTimeout(() => alertBox.classList.add('d-none'), 5000);
   },
 
-  /**
-   * Format angka nominal reguler ke mata uang Rupiah IDR
-   */
   formatRupiah: function(angka) {
     return "Rp " + Number(angka).toLocaleString('id-ID', { minimumFractionDigits: 0 });
   },
 
   /**
-   * Menembak GET API ke server GAS untuk kalkulasi komponen biaya agregat
+   * Menarik daftar pasien yang memiliki status butuh pembayaran ('Apotek' atau 'Pembayaran')
    */
-  hitungBilling: async function() {
-    const idAntrian = document.getElementById('kasir-search-id').value.trim();
-    const workspace = document.getElementById('kasir-workspace');
-    const emptyBox = document.getElementById('kasir-empty-workspace');
+  loadAntreanKasir: async function() {
+    const listContainer = document.getElementById('live-antrean-kasir-list');
+    if (!listContainer) return;
 
+    try {
+      // Menggunakan API listAntrianHariIni yang sudah ada di Main.gs
+      const url = `${CONFIG.BASE_URL}?api_key=${CONFIG.API_KEY}&action=listAntrianHariIni`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+      const res = await response.json();
+
+      if (res.success && res.data.length > 0) {
+        // Filter pasien yang statusnya masuk ke koridor Kasir/Apotek
+        const pasienKasir = res.data.filter(p => 
+          p.status.toLowerCase() === 'apotek' || 
+          p.status.toLowerCase() === 'pembayaran' ||
+          p.status.toLowerCase() === 'pemeriksaan'
+        );
+
+        if (pasienKasir.length === 0) {
+          listContainer.innerHTML = `<tr><td colspan="7" class="text-muted py-3">Tidak ada antrean pembayaran aktif saat ini.</td></tr>`;
+          return;
+        }
+
+        listContainer.innerHTML = '';
+        pasienKasir.forEach(p => {
+          listContainer.innerHTML += `
+            <tr>
+              <td class="fw-bold">${p.no_antrian}</td>
+              <td><code>${p.id_antrian}</code></td>
+              <td>${p.no_rm}</td>
+              <td class="text-start fw-medium">${p.nama_pasien}</td>
+              <td>${p.nama_poli || 'Poli Umum'}</td>
+              <td><span class="badge bg-warning text-dark px-2 py-1">${p.status}</span></td>
+              <td>
+                <button onclick="KasirModule.hitungBilling('${p.id_antrian}')" class="btn btn-sm btn-primary fw-medium px-3">
+                  <i class="bi bi-calculator me-1"></i> Proses Tagihan
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      } else {
+        listContainer.innerHTML = `<tr><td colspan="7" class="text-muted py-3">Tidak ada data antrean hari ini.</td></tr>`;
+      }
+    } catch (e) {
+      listContainer.innerHTML = `<tr><td colspan="7" class="text-danger py-3">Gagal menyinkronkan antrean live dari server.</td></tr>`;
+    }
+  },
+
+  hitungBillingManual: function() {
+    const idAntrian = document.getElementById('kasir-search-id').value.trim();
     if (!idAntrian) {
-      this.showAlert("Silakan masukkan ID Antrean pasien terlebih dahulu.", false);
+      this.showAlert("Silakan isi ID Antrean terlebih dahulu.", false);
       return;
     }
+    this.hitungBilling(idAntrian);
+  },
+
+  /**
+   * Menembak GET API ke server GAS untuk kalkulasi komponen biaya agregat secara otomatis
+   */
+  hitungBilling: async function(idAntrian) {
+    const workspace = document.getElementById('kasir-workspace');
+    const emptyBox = document.getElementById('kasir-empty-workspace');
 
     workspace.classList.add('d-none');
     emptyBox.querySelector('.card-body').innerText = "Sedang menarik kompilasi data billing server...";
@@ -238,6 +321,9 @@ const KasirModule = {
 
         emptyBox.classList.add('d-none');
         workspace.classList.remove('d-none');
+        
+        // Naikkan window focus ke workspace area pembukuan biaya
+        workspace.scrollIntoView({ behavior: 'smooth' });
       } else {
         emptyBox.querySelector('.card-body').innerText = res.message || "Data transaksi antrean tidak ditemukan atau sudah diselesaikan.";
         this.activeBillingData = null;
@@ -248,9 +334,6 @@ const KasirModule = {
     }
   },
 
-  /**
-   * Logika interaktif menghitung sisa kembalian tunai (Cashback Counter)
-   */
   hitungKembalian: function() {
     if (!this.activeBillingData) return;
     const uangMasuk = Number(document.getElementById('settle-bayar-nominal').value) || 0;
@@ -308,18 +391,20 @@ const KasirModule = {
       if (res.success) {
         this.showAlert(`Sukses! Pembayaran berhasil diselesaikan. Invoice: ${res.data.id_invoice}`);
         
-        // Pemicu cetak invoice nota fisik ke thermal printer kassa kasir
         this.cetakNotaInvoiceFisik(res.data.id_invoice);
 
-        // Reset workspace kasir
+        // Reset workspace & reload antrean live terbaru
         this.activeBillingData = null;
         document.getElementById('kasir-search-id').value = '';
         document.getElementById('kasir-workspace').classList.add('d-none');
         document.getElementById('kasir-empty-workspace').classList.remove('d-none');
         document.getElementById('kasir-empty-workspace').querySelector('.card-body').innerHTML = `
           <i class="bi bi-inboxes text-secondary h1 d-block mb-3"></i>
-          Masukkan ID Antrean pasien di atas, lalu tekan kalkulasi untuk menarik data tagihan resmi klinik.
+          Pilih salah satu pasien di atas untuk memuat rincian billing tagihan resmi klinik.
         `;
+        
+        // Reload tabel otomatis
+        this.loadAntreanKasir();
       } else {
         this.showAlert(res.message || "Gagal memproses log kassa kasir.", false);
         btn.disabled = false;
@@ -332,9 +417,6 @@ const KasirModule = {
     }
   },
 
-  /**
-   * Menghasilkan visual nota print layout mini thermal printer 58mm untuk kuitansi sah pasien
-   */
   cetakNotaInvoiceFisik: function(idInvoice) {
     const data = this.activeBillingData;
     if (!data) return;
