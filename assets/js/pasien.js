@@ -221,7 +221,7 @@ const PasienModule = {
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
-      if (res.success && res.data && res.data.length > 0) {
+      if ((res.success || res.status === "success") && res.data && res.data.length > 0) {
         tbody.innerHTML = res.data.map(pasien => `
           <tr>
             <td class="py-2 px-3 fw-bold font-monospace text-primary">${pasien.no_rm}</td>
@@ -309,7 +309,7 @@ const PasienModule = {
 
       const res = await response.json();
 
-      if (res.success) {
+      if (res.success || res.status === "success") {
         this.showAlert(`Sukses! Pasien baru berhasil didaftarkan. Nomor RM: ${res.data.no_rm}`);
         document.getElementById('form-registrasi-pasien').reset();
         
@@ -348,7 +348,7 @@ const PasienModule = {
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
-      if (res.success && res.data.length > 0) {
+      if ((res.success || res.status === "success") && res.data.length > 0) {
         const pasien = res.data[0];
         
         this.selectedPasienRM = pasien.no_rm;
@@ -412,8 +412,14 @@ const PasienModule = {
 
       const res = await response.json();
 
-      if (res.success) {
-        this.showAlert(`Sukses! Nomor Antrean berhasil dicetak: ${res.data.no_antrian} (${poli})`);
+      if (res.success || res.status === "success") {
+        const selPoliText = document.getElementById('queue-poli').options[document.getElementById('queue-poli').selectedIndex].text;
+        this.showAlert(`Sukses! Nomor Antrean berhasil dicetak: ${res.data.no_antrian} (${selPoliText})`);
+        
+        // DEKLARASI VARIABEL UNTUK MENCEGAH REFERENCE ERROR
+        const resultsContainer = document.getElementById('search-results-container');
+        const emptyPlaceholder = document.getElementById('search-empty-placeholder');
+
         if (resultsContainer) resultsContainer.classList.add('hidden');
         if (emptyPlaceholder) {
           emptyPlaceholder.classList.remove('hidden');
@@ -427,6 +433,7 @@ const PasienModule = {
         this.showAlert(res.message || "Gagal memproses check-in antrean.", false);
       }
     } catch (err) {
+      console.error(err);
       this.showAlert("Error: Koneksi server bermasalah saat check-in.", false);
     } finally {
       this.loadLiveMonitor();
