@@ -189,7 +189,7 @@ window.PasienModule = window.PasienModule || {
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
-      if (res.success && res.data && res.data.length > 0) {
+      if ((res.success || res.status === "success") && res.data && res.data.length > 0) {
         tbody.innerHTML = res.data.map(pasien => `
           <tr>
             <td class="py-2 px-3 fw-bold font-monospace text-primary">${pasien.no_rm}</td>
@@ -243,7 +243,7 @@ window.PasienModule = window.PasienModule || {
       });
       const res = await response.json();
 
-      if (res.success) {
+      if (res.success || res.status === "success") {
         this.showAlert(`Sukses mendaftarkan pasien! RM Baru: ${res.data.no_rm}`);
         document.getElementById('form-pasien-baru').reset();
 
@@ -293,7 +293,7 @@ window.PasienModule = window.PasienModule || {
       const response = await fetch(url, { method: 'GET', mode: 'cors' });
       const res = await response.json();
 
-      if (res.success && res.data && res.data.length > 0) {
+      if ((res.success || res.status === "success") && res.data && res.data.length > 0) {
         const pasien = res.data[0];
         pasien.jenis_penjamin = pasien.jenis_penjamin || pasien.penjamin;
         this.pilihPasienDariTabel(pasien);
@@ -319,7 +319,7 @@ window.PasienModule = window.PasienModule || {
 
     const btn = document.getElementById('btn-submit-antrean');
     btn.disabled = true;
-    btn.innerText = "Memproses...";
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...`;
 
     const payload = {
       api_key: CONFIG.API_KEY,
@@ -338,15 +338,18 @@ window.PasienModule = window.PasienModule || {
       });
       const res = await response.json();
 
-      if (res.success) {
+      if (res.success || res.status === "success") {
         alert(`Sukses! Pasien masuk antrean kerja dengan Nomor Urut: ${res.data.no_antrian}`);
         this.batalEksekusi();
       } else {
         this.showAlert(res.message || "Gagal mengalokasikan nomor antrean.", false);
       }
     } catch (e) {
+      console.error(e);
       this.showAlert("Error: Sambungan internet server terputus.", false);
     } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="bi bi-box-arrow-in-right me-1"></i> Masukkan ke Antrean Kerja`;
       this.loadLiveMonitor();
     }
   }
